@@ -112,6 +112,77 @@ This repository serves as a comprehensive template and quick start guide for dev
     ```
     for increased verbosity.
 
+## Using Poetry for Dependency Management 📦
+
+Poetry is a powerful dependency management tool for Python projects. It simplifies the process of managing dependencies, packaging, and publishing your project.
+
+### Installation
+If you haven't installed Poetry yet, you can do so using pip:
+
+```bash
+pip install poetry
+```
+
+### Adding Dependencies
+To add dependencies to your project, use the `add` command followed by the package name and optionally the version:
+
+```bash
+poetry add package_name
+```
+
+For example, to add FastAPI:
+
+```bash
+poetry add fastapi
+```
+
+### Updating Dependencies
+To update dependencies to their latest compatible version, use the `update` command:
+
+```bash
+poetry update
+```
+
+### Removing Dependencies
+To remove a dependency from your project, use the `remove` command followed by the package name:
+
+```bash
+poetry remove package_name
+```
+
+### Installing Dependencies
+After adding or updating dependencies, you need to install them:
+
+```bash
+poetry install
+```
+
+This command will create a virtual environment and install all dependencies specified in your `pyproject.toml` file.
+
+### Running Scripts
+You can define custom scripts in your `pyproject.toml` file under the `[tool.poetry.scripts]` section. To run a script, use the `run` command followed by the script name:
+
+```bash
+poetry run script_name
+```
+
+For example, if you have a script named `my_script`:
+
+```bash
+poetry run my_script
+```
+
+### Generating Lock File
+Poetry generates a lock file (`poetry.lock`) to ensure deterministic builds. To regenerate the lock file, use the `lock` command:
+
+```bash
+poetry lock
+```
+
+### More Information
+For more information and advanced usage of Poetry, refer to the [official documentation](https://python-poetry.org/docs/).
+
+
 ## Implemented Features 🎉
 The API already includes endpoints for various operations:
 1. **Direct User Creation**:
