@@ -1,0 +1,22 @@
+from fastapi_mail import ConnectionConfig, FastMail
+from src.core.dependencies import get_settings
+
+SETTINGS = get_settings()
+
+EMAIL_CONF = ConnectionConfig(
+    MAIL_USERNAME=SETTINGS.MAIL_USERNAME,
+    MAIL_PASSWORD=SETTINGS.MAIL_PASSWORD,
+    MAIL_FROM=SETTINGS.MAIL_FROM,
+    MAIL_PORT=SETTINGS.MAIL_PORT,
+    MAIL_SERVER=SETTINGS.MAIL_SERVER,
+    MAIL_FROM_NAME=SETTINGS.MAIL_FROM_NAME,
+    MAIL_STARTTLS=SETTINGS.MAIL_STARTTLS,
+    MAIL_SSL_TLS=SETTINGS.MAIL_SSL_TLS,
+    USE_CREDENTIALS=SETTINGS.USE_CREDENTIALS,
+    VALIDATE_CERTS=SETTINGS.VALIDATE_CERTS,
+    TEMPLATE_FOLDER="src/routers/email_templates/",
+)
+
+
+def get_fast_mail() -> FastMail:
+    return FastMail(EMAIL_CONF)
