@@ -1,5 +1,6 @@
 from fastapi import status
 from fastapi.testclient import TestClient
+
 from src.config.settings import Settings
 from src.core.email import get_fast_mail
 
@@ -42,6 +43,7 @@ def test_invite_user(client: TestClient, settings: Settings):
             == f"{settings.MAIL_FROM_NAME} <{settings.MAIL_FROM}>"
         )
         assert outbox[0]["To"] == USER_INVITED_INFO["email"]
+
 
 def test_invite_already_invited_user(client: TestClient):
     fast_mail = get_fast_mail()
