@@ -6,6 +6,7 @@ from sqlalchemy import create_engine, sql
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy_utils import create_database, database_exists, drop_database
+
 from src.config.settings import Settings
 from src.core.database import SCHEMA, Base, build_database_uri
 from src.core.dependencies import get_db, get_settings
