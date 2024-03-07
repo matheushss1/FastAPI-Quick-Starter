@@ -48,7 +48,7 @@ def test_invite_user(client: TestClient, settings: Settings):
 def test_invite_already_invited_user(client: TestClient):
     fast_mail = get_fast_mail()
     fast_mail.config.SUPPRESS_SEND = 1
-    with fast_mail.record_messages() as outbox:
+    with fast_mail.record_messages() as _:
         response = client.post("/user/invite", json=USER_INVITED_INFO)
         assert response.status_code == 400
 
