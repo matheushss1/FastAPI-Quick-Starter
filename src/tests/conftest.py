@@ -74,5 +74,3 @@ def client_fixture(
         yield client
 
     app.dependency_overrides.clear()
-
-    app.dependency_overrides.clear()
