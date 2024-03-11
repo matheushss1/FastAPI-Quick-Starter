@@ -29,6 +29,20 @@ def test_create_user_directly(client: TestClient, superuser_token: str):
     assert response.json() == expected_response
 
 
+def test_create_user_directly_fails_without_token(client: TestClient):
+    user_info = {
+        "name": "test",
+        "last_name": "user",
+        "email": "test_creating@test.com",
+        "password": "testpass",
+    }
+
+    response = client.post(
+        "/user/signup",
+        json=user_info,
+    )
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
 USER_INVITED_INFO = {
     "name": "test",
     "last_name": "user",
