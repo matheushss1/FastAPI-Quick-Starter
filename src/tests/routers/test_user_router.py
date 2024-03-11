@@ -113,7 +113,9 @@ def test_confirm_user_invitation(client: TestClient):
     }
     response = client.post("/user/confirm-invitation", json=user_credentials)
     assert response.status_code == 200
-    assert response.json() == USER_INVITED_INFO
+    user_with_scopes = USER_INVITED_INFO.copy()
+    user_with_scopes.update({"scopes": ["users:self"]})
+    assert response.json() == user_with_scopes
 
 
 def test_get_auth_token(client: TestClient):
