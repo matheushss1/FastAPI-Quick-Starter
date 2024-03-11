@@ -43,6 +43,30 @@ def test_create_user_directly_fails_without_token(client: TestClient):
     )
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
+
+def test_create_user_directly_fails_not_enough_permissions(client: TestClient):
+    user_credentials = {
+        "username": "test_creating@test.com",
+        "password": "testpass",
+    }
+    token_response = client.post("/user/token", data=user_credentials)
+    token = token_response.json().get("access_token")
+    user_info = {
+        "name": "test",
+        "last_name": "user",
+        "email": "test_should_fail@test.com",
+        "password": "testpass",
+    }
+
+    response = client.post(
+        "/user/signup",
+        json=user_info,
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+    assert response.json().get("detail") == "Not enough permissions"
+
+
 USER_INVITED_INFO = {
     "name": "test",
     "last_name": "user",
