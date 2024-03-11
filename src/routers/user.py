@@ -85,7 +85,11 @@ async def login(
     return Token(access_token=access_token, token_type="bearer")
 
 
-@router.get("/me", response_model=User)
+@router.get(
+    "/me",
+    response_model=User,
+    dependencies=[Security(get_current_user, scopes=["users:self"])],
+)
 async def get_logged_user(
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
