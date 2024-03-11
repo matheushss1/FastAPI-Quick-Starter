@@ -22,7 +22,16 @@ def get_settings() -> Settings:
     return Settings()
 
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/user/token")
+OAUTH2_SCOPES = {
+    "users:self": "Read/Update self",
+    "users:r": "Read information about all users",
+    "users:rw": "Read and write information about all users",
+    "users:all": "All operations allowed for users",
+}
+
+oauth2_scheme = OAuth2PasswordBearer(
+    tokenUrl="/user/token", scopes=OAUTH2_SCOPES
+)
 
 
 def get_current_user(
