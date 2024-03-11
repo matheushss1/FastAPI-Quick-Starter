@@ -68,7 +68,23 @@ def get_current_user(
 
     user = _get_user_by_email(db=db, email=email)
 
+    if not user:
+        raise CREDENTIALS_EXCEPTION
+
+    user_has_permissions = _check_if_user_has_permissions(
+        user=user, requested_scopes=security_scopes.scopes
     )
+
+    if not user_has_permissions:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not enough permissions",
+            headers={"WWW-Authenticate": authenticate_value},
+        )
+
+    return user
+
+
 def _get_user_by_email(db: Session, email: str) -> User | None:
     user_db_list = (
         db.query(SQLAlchemyUser).filter(SQLAlchemyUser.email == email).all()
