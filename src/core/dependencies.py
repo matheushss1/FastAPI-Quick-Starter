@@ -64,11 +64,10 @@ def get_current_user(
         if not email:
             raise CREDENTIALS_EXCEPTION
     except JWTError:
-        raise credentials_exception
-    user = (
-        db.query(SQLAlchemyUser)
-        .filter(SQLAlchemyUser.email == token_data.email)
-        .one()
+        raise CREDENTIALS_EXCEPTION
+
+    user = _get_user_by_email(db=db, email=email)
+
     )
     if user:
         return User(name=user.name, last_name=user.last_name, email=user.email)
