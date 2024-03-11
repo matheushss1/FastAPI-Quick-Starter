@@ -149,4 +149,6 @@ def test_get_logged_user(client: TestClient):
         headers={"Authorization": f"Bearer {token}"},
     )
     assert response.status_code == 200
-    assert response.json() == USER_INVITED_INFO
+    user_with_scopes = USER_INVITED_INFO.copy()
+    user_with_scopes.update({"scopes": ["users:self"]})
+    assert response.json() == user_with_scopes
