@@ -19,3 +19,5 @@ def user_fixture(session: Session) -> Generator[User, None, None]:
     session.add(user)
     session.commit()
     yield user
+    session.delete(user)
+    session.commit()
