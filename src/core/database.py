@@ -18,7 +18,7 @@ def build_database_uri(
         password or os.getenv("DB_PASSWORD", "test"),
         host or os.getenv("DB_HOST", "localhost"),
         port or os.getenv("DB_PORT", 5432),
-        database or os.getenv("DB_DATABASE", "eqrx-local"),
+        database or os.getenv("DB_DATABASE", "database"),
     )
 
 
