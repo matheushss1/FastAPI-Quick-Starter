@@ -35,12 +35,13 @@ oauth2_scheme = OAuth2PasswordBearer(
 
 
 def get_current_user(
+    security_scopes: SecurityScopes,
     token: Annotated[str, Depends(oauth2_scheme)],
     db: Session = Depends(get_db),
 ) -> User:
     """
     Decodes the JWT and checks for the authenticated
-    user that is performing the request.
+    user that is performing the request. Also checks the permission scopes.
     """
     SETTINGS = get_settings()
     SECRET_KEY = SETTINGS.SECRET_KEY
