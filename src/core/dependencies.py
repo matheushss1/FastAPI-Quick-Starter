@@ -1,13 +1,13 @@
-from typing import Annotated, Generator
+from typing import Annotated, Generator, List
 
 from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import OAuth2PasswordBearer, SecurityScopes
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 from src.config.settings import Settings
 from src.core.database import SessionLocal
 from src.models.orm.user import User as SQLAlchemyUser
-from src.models.pydantic.user import TokenData, User
+from src.models.pydantic.user import User
 
 
 def get_db() -> Generator[Session, None, None]:
