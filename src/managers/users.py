@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta, timezone
 from hashlib import md5
-from typing import Literal, Union
+from typing import Literal
 
 from bcrypt import checkpw, gensalt, hashpw
 from fastapi import HTTPException
@@ -11,12 +11,7 @@ from src.core.dependencies import get_settings
 from src.models.orm.user import User as SQLAlchemyUser
 from src.models.orm.user import UserInvited as SQLAlchemyUserInvited
 from src.models.pydantic.user import User as PydanticUser
-from src.models.pydantic.user import (
-    UserCreation,
-    UserCredentials,
-    UserInDB,
-    UserInvited,
-)
+from src.models.pydantic.user import UserCreation, UserCredentials, UserInvited
 
 SETTINGS = get_settings()
 SECRET_KEY = SETTINGS.SECRET_KEY
