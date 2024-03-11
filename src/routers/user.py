@@ -31,7 +31,10 @@ def create_user(
 
 
 @router.post(
-    "/invite", status_code=status.HTTP_200_OK, response_model=UserInvited
+    "/invite",
+    status_code=status.HTTP_200_OK,
+    response_model=UserInvited,
+    dependencies=[Security(get_current_user, scopes=["users:rw"])],
 )
 async def invite_user(
     user: UserInvited,
