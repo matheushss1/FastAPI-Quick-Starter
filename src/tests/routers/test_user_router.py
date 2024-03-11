@@ -94,11 +94,15 @@ def test_invite_user(
         assert outbox[0]["To"] == USER_INVITED_INFO["email"]
 
 
-def test_invite_already_invited_user(client: TestClient):
+def test_invite_already_invited_user(client: TestClient, superuser_token: str):
     fast_mail = get_fast_mail()
     fast_mail.config.SUPPRESS_SEND = 1
     with fast_mail.record_messages() as _:
-        response = client.post("/user/invite", json=USER_INVITED_INFO)
+        response = client.post(
+            "/user/invite",
+            json=USER_INVITED_INFO,
+            headers={"Authorization": f"Bearer {superuser_token}"},
+        )
         assert response.status_code == 400
 
 
