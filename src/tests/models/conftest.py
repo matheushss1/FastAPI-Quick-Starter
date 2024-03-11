@@ -8,7 +8,7 @@ from src.models.orm.user import User
 
 
 @fixture(name="user")
-def user_fixture(session: Session):
+def user_fixture(session: Session) -> Generator[User, None, None]:
     password_hash = UserManager(session).get_password_hash("testpass")
     user = User(
         name="Test",
