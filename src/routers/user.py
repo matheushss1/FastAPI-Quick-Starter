@@ -80,7 +80,7 @@ async def login(
             "Incorrect e-mail or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    data = {"sub": user.email}
+    data = {"sub": user.email, "scopes": user.scopes}
     access_token = user_manager.create_access_token(data)
     return Token(access_token=access_token, token_type="bearer")
 
