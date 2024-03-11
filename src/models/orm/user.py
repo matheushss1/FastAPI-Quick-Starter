@@ -11,6 +11,7 @@ class User(Base):
     last_name = Column(String, nullable=False)
     email = Column(String, nullable=False, unique=True)
     hashed_password = Column(String, nullable=False)
+    scopes = Column(ARRAY(String), nullable=False)
 
 
 class UserInvited(Base):
