@@ -1,4 +1,5 @@
 from sqlalchemy import Column, DateTime, Integer, String
+from sqlalchemy.dialects.postgresql import ARRAY
 from src.core.database import Base
 
 
