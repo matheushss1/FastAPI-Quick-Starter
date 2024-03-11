@@ -99,6 +99,7 @@ class UserManager:
             last_name=user_creation.last_name,
             email=user_creation.email,
             hashed_password=self.get_password_hash(user_creation.password),
+            scopes=["users:self"],
         )
         self.db.execute(statement)
         self.db.commit()
