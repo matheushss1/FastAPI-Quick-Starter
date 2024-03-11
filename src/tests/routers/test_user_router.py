@@ -74,11 +74,17 @@ USER_INVITED_INFO = {
 }
 
 
-def test_invite_user(client: TestClient, settings: Settings):
+def test_invite_user(
+    client: TestClient, settings: Settings, superuser_token: str
+):
     fast_mail = get_fast_mail()
     fast_mail.config.SUPPRESS_SEND = 1
     with fast_mail.record_messages() as outbox:
-        response = client.post("/user/invite", json=USER_INVITED_INFO)
+        response = client.post(
+            "/user/invite",
+            json=USER_INVITED_INFO,
+            headers={"Authorization": f"Bearer {superuser_token}"},
+        )
         assert response.status_code == 200
         assert len(outbox) == 1
         assert (
