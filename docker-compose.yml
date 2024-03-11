@@ -15,7 +15,7 @@ services:
         service_name: ${API_NAME}
     image: ${API_NAME}
     container_name: ${API_NAME}
-    entrypoint: "alembic upgrade head && uvicorn src.main:app --host 0.0.0.0 --port $API_PORT --reload"
+    entrypoint: "uvicorn src.main:app --host 0.0.0.0 --port $API_PORT --reload"
     depends_on:
       - database
     environment:
