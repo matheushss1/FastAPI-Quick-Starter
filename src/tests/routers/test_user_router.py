@@ -5,7 +5,7 @@ from src.config.settings import Settings
 from src.core.email import get_fast_mail
 
 
-def test_create_user_directly(client: TestClient):
+def test_create_user_directly(client: TestClient, superuser_token: str):
     user_info = {
         "name": "test",
         "last_name": "user",
@@ -13,12 +13,17 @@ def test_create_user_directly(client: TestClient):
         "password": "testpass",
     }
 
-    response = client.post("/user/signup", json=user_info)
+    response = client.post(
+        "/user/signup",
+        json=user_info,
+        headers={"Authorization": f"Bearer {superuser_token}"},
+    )
 
     expected_response = {
         "name": "test",
         "last_name": "user",
         "email": "test_creating@test.com",
+        "scopes": ["users:self"],
     }
     assert response.status_code == status.HTTP_201_CREATED
     assert response.json() == expected_response
