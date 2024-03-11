@@ -98,7 +98,6 @@ This repository serves as a comprehensive template and quick start guide for dev
     ```bash
     docker compose run --rm --entrypoint "sh -c" backend 'alembic upgrade head'
     ```
-    The [`backend entrypoint`](./docker-compose.yml#L18) executes `alembic upgrade head` each time the container is initiated.
 
 ## Running Tests 🧪
 - To run tests, use the following script:
