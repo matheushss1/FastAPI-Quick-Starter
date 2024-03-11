@@ -104,9 +104,7 @@ class UserManager:
         self.db.commit()
         return self.get_db_user_by_email(user_creation.email)
 
-    def get_db_user_by_email(
-        self, email: str
-    ) -> Union[UserInDB, PydanticUser]:
+    def get_db_user_by_email(self, email: str) -> PydanticUser:
         """
         Query the DB for the user with the given e-mail.
         """
