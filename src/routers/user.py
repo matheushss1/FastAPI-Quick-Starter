@@ -19,7 +19,10 @@ router = APIRouter(prefix="/user")
 
 
 @router.post(
-    "/signup", status_code=status.HTTP_201_CREATED, response_model=User
+    "/signup",
+    status_code=status.HTTP_201_CREATED,
+    response_model=User,
+    dependencies=[Security(get_current_user, scopes=["users:rw"])],
 )
 def create_user(
     user_creation: UserCreation, db: Session = Depends(get_db)
