@@ -82,3 +82,11 @@ def _get_user_by_email(db: Session, email: str) -> User | None:
         )
     return None
 
+
+def _check_if_user_has_permissions(
+    user: User, requested_scopes: List[str]
+) -> bool:
+    for scope in requested_scopes:
+        if scope not in user.scopes:
+            return False
+    return True
