@@ -21,7 +21,10 @@ class UserCredentials(BaseModel):
     password: str
 
 
-class UserCreation(User):
+class UserCreation(BaseModel):
+    name: str
+    last_name: str
+    email: str
     password: str
 
 
