@@ -26,3 +26,15 @@ def superuser_fixture(session: Session) -> Generator[User, None, None]:
     session.delete(user)
     session.commit()
 
+
+@fixture(name="superuser_token")
+def superuser_token_fixture(client: TestClient, superuser: User) -> str:
+    response = client.post(
+        "/user/token",
+        data={
+            "username": superuser.email,
+            "password": PASSWORD,
+            "scope": "users:self users:r users:rw users:all",
+        },
+    )
+    return response.json().get("access_token")
