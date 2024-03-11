@@ -70,7 +70,7 @@ def test_create_user_directly_fails_not_enough_permissions(client: TestClient):
 USER_INVITED_INFO = {
     "name": "test",
     "last_name": "user",
-    "email": "pre-created-user@email.com",
+    "email": "user-invited@email.com",
 }
 
 
