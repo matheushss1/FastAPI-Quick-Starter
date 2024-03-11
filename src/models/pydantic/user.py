@@ -8,6 +8,7 @@ class User(BaseModel):
     name: str
     last_name: str
     email: str
+    scopes: List[str] = ["users:self"]
 
 
 class UserInvited(User):
