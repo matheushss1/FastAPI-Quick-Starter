@@ -46,11 +46,18 @@ def get_current_user(
     SETTINGS = get_settings()
     SECRET_KEY = SETTINGS.SECRET_KEY
     ALGORITHM = SETTINGS.ALGORITHM
-    credentials_exception = HTTPException(
+
+    if security_scopes.scopes:
+        authenticate_value = f"Bearer scopes={security_scopes.scope_str}"
+    else:
+        authenticate_value = "Bearer"
+
+    CREDENTIALS_EXCEPTION = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Invalid credentials",
-        headers={"WWW-Authenticate": "Bearer"},
+        headers={"WWW-Authenticate": authenticate_value},
     )
+
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         email = payload.get("sub")
