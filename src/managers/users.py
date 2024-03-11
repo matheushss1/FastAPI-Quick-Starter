@@ -115,7 +115,10 @@ class UserManager:
         )
         if user:
             return PydanticUser(
-                name=user.name, last_name=user.last_name, email=user.email
+                name=user.name,
+                last_name=user.last_name,
+                email=user.email,
+                scopes=user.scopes,
             )
         raise HTTPException(404, "User not found")
 
@@ -177,7 +180,10 @@ class UserManager:
         if not self.verify_password(password, user.hashed_password):
             return False
         return PydanticUser(
-            name=user.name, last_name=user.last_name, email=user.email
+            name=user.name,
+            last_name=user.last_name,
+            email=user.email,
+            scopes=user.scopes,
         )
 
     def create_access_token(
