@@ -69,6 +69,16 @@ def get_current_user(
     user = _get_user_by_email(db=db, email=email)
 
     )
-    if user:
-        return User(name=user.name, last_name=user.last_name, email=user.email)
-    raise credentials_exception
+def _get_user_by_email(db: Session, email: str) -> User | None:
+    user_db_list = (
+        db.query(SQLAlchemyUser).filter(SQLAlchemyUser.email == email).all()
+    )
+    if len(user_db_list):
+        return User(
+            name=user_db_list[0].name,
+            last_name=user_db_list[0].last_name,
+            email=user_db_list[0].email,
+            scopes=user_db_list[0].scopes,
+        )
+    return None
+
