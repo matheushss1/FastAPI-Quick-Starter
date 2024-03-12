@@ -40,6 +40,21 @@ def test_create_user_directly_fails_without_token(client: TestClient):
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
+def test_create_user_directly_fails_with_string_not_token(client: TestClient):
+    user_info = {
+        "name": "test",
+        "email": "test_creating@test.com",
+        "password": "testpass",
+    }
+
+    response = client.post(
+        "/user/signup",
+        json=user_info,
+        headers={"Authorization": "Bearer NotAToken"},
+    )
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+
 def test_create_user_directly_fails_not_enough_permissions(client: TestClient):
     user_credentials = {
         "username": "test_creating@test.com",
