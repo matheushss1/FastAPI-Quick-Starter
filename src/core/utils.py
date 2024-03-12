@@ -70,3 +70,20 @@ def get_user_scopes(role: str, oauth2_scopes=Dict[str, str]) -> List[str]:
     }
     return role_scopes.get(role)
 
+
+def get_email_by_decoded_jwt(
+    token: str,
+    secret_key: str,
+    algorithm: str,
+    credentials_exception: HTTPException,
+) -> str:
+    email = None
+    try:
+        payload = jwt.decode(token, secret_key, algorithms=[algorithm])
+        email = payload.get("sub")
+        if not email:
+            raise credentials_exception
+    except JWTError:
+        raise credentials_exception
+    finally:
+        return email
