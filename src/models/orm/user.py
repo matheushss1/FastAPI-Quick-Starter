@@ -1,5 +1,4 @@
-from sqlalchemy import Column, DateTime, Integer, String
-from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy import Column, DateTime, Enum, Integer, String
 from src.core.database import Base
 
 
@@ -10,7 +9,10 @@ class User(Base):
     name = Column(String, nullable=False)
     email = Column(String, nullable=False, unique=True)
     hashed_password = Column(String, nullable=False)
-    scopes = Column(ARRAY(String), nullable=False)
+    role = Column(
+        Enum("member", "user", "manager", "admin", name="roles"),
+        nullable=False,
+    )
 
 
 class UserInvited(Base):
