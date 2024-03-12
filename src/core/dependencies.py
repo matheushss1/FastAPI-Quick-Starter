@@ -1,12 +1,18 @@
-from typing import Annotated, Generator, List
+from typing import Annotated, Generator
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer, SecurityScopes
-from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 from src.config.settings import Settings
 from src.core.database import SessionLocal
-from src.models.orm.user import User as SQLAlchemyUser
+from src.core.security import OAUTH2_SCOPES
+from src.core.utils import (
+    check_if_user_has_permissions,
+    get_credentials_exceptions,
+    get_email_by_decoded_jwt,
+    get_user_by_email,
+    get_user_scopes,
+)
 from src.models.pydantic.user import User
 
 
@@ -21,13 +27,6 @@ def get_db() -> Generator[Session, None, None]:
 def get_settings() -> Settings:
     return Settings()
 
-
-OAUTH2_SCOPES = {
-    "users:self": "Read/Update self",
-    "users:r": "Read information about all users",
-    "users:rw": "Read and write information about all users",
-    "users:all": "All operations allowed for users",
-}
 
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl="/user/token", scopes=OAUTH2_SCOPES
@@ -47,62 +46,29 @@ def get_current_user(
     SECRET_KEY = SETTINGS.SECRET_KEY
     ALGORITHM = SETTINGS.ALGORITHM
 
-    if security_scopes.scopes:
-        authenticate_value = f"Bearer scopes={security_scopes.scope_str}"
-    else:
-        authenticate_value = "Bearer"
+    credentials_exception = get_credentials_exceptions(security_scopes)
 
-    CREDENTIALS_EXCEPTION = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Invalid credentials",
-        headers={"WWW-Authenticate": authenticate_value},
+    email = get_email_by_decoded_jwt(
+        token=token,
+        secret_key=SECRET_KEY,
+        algorithm=ALGORITHM,
+        credentials_exception=credentials_exception,
     )
 
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        email = payload.get("sub")
-        if not email:
-            raise CREDENTIALS_EXCEPTION
-    except JWTError:
-        raise CREDENTIALS_EXCEPTION
+    user = get_user_by_email(
+        db=db, email=email, credentials_exception=credentials_exception
+    )
 
-    user = _get_user_by_email(db=db, email=email)
+    user_scopes = get_user_scopes(role=user.role, oauth2_scopes=OAUTH2_SCOPES)
 
-    if not user:
-        raise CREDENTIALS_EXCEPTION
-
-    user_has_permissions = _check_if_user_has_permissions(
-        user=user, requested_scopes=security_scopes.scopes
+    user_has_permissions = check_if_user_has_permissions(
+        user_scopes=user_scopes, requested_scopes=security_scopes.scopes
     )
 
     if not user_has_permissions:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not enough permissions",
-            headers={"WWW-Authenticate": authenticate_value},
+        forbidden_exception = get_credentials_exceptions(
+            security_scopes, forbidden=True
         )
+        raise forbidden_exception
 
     return user
-
-
-def _get_user_by_email(db: Session, email: str) -> User | None:
-    user_db_list = (
-        db.query(SQLAlchemyUser).filter(SQLAlchemyUser.email == email).all()
-    )
-    if len(user_db_list):
-        return User(
-            name=user_db_list[0].name,
-            last_name=user_db_list[0].last_name,
-            email=user_db_list[0].email,
-            scopes=user_db_list[0].scopes,
-        )
-    return None
-
-
-def _check_if_user_has_permissions(
-    user: User, requested_scopes: List[str]
-) -> bool:
-    for scope in requested_scopes:
-        if scope not in user.scopes:
-            return False
-    return True
