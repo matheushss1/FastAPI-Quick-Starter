@@ -203,6 +203,8 @@ The API already includes endpoints for various operations:
     - An implemented flow where users are invited via email, receive an invitation link, submit their new credentials, and are subsequently created. See [here](./src/routers/user.py#L30) and [here](./src/routers/user.py#L53).
 3. **User Authorization/Authentication Flow**:
     - After creation, users can obtain an `OAuth2 Bearer Token` by submitting their email and password, allowing them to perform authorized requests. See [here](./src/routers/user.py#L62) and [here](./src/routers/user.py#L82).
+4. **Role-Based Access Control (RBAC) with Scopes**:
+- Implemented RBAC ensures secure access control to resources based on user roles and scopes. Users are assigned specific permissions (scopes) that dictate their access level within the system, enhancing security and enforcing authorization policies. See [here](./src/core/dependencies.py#L62) and [here](./src/core/utils.py#L55).
 
 ### Connect and Follow
 I hope this template proves useful for your applications! Don't forget to follow me here on [GitHub](https://github.com/matheushss1) and connect with me on [LinkedIn](https://www.linkedin.com/in/eng-matheus-henrique/).
