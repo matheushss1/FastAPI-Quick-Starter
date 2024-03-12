@@ -18,7 +18,6 @@ class UserInvited(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
-    last_name = Column(String, nullable=False)
     email = Column(String, nullable=False, unique=True)
     invitation_link = Column(String, nullable=False)
     invitation_expires = Column(DateTime, nullable=False)
