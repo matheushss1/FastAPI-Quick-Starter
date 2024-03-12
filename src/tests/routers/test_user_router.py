@@ -113,6 +113,7 @@ def test_invite_already_invited_user(client: TestClient, superuser_token: str):
             headers={"Authorization": f"Bearer {superuser_token}"},
         )
         assert response.status_code == 400
+        assert response.json().get("detail") == "E-mail already registered"
 
 
 def test_confirm_user_invitation(client: TestClient):
