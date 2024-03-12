@@ -17,7 +17,7 @@ def superuser_fixture(session: Session) -> Generator[User, None, None]:
         last_name="From Tests",
         email="testuser@test.com",
         hashed_password=password_hash,
-        scopes=["users:self", "users:r", "users:rw", "users:all"],
+        role="admin",
     )
     session.add(user)
     session.commit()

@@ -14,7 +14,7 @@ def user_fixture(session: Session) -> Generator[User, None, None]:
         last_name="User",
         email="test@test.com",
         hashed_password=password_hash,
-        scopes=["user:self"],
+        role="member",
     )
     session.add(user)
     session.commit()
