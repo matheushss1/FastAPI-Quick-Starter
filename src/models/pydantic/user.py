@@ -10,7 +10,9 @@ class User(BaseModel):
     scopes: List[str] = ["users:self"]
 
 
-class UserInvited(User):
+class UserInvited(BaseModel):
+    name: str
+    email: str
     invitation_link: Optional[str] = None
     invitation_expires: datetime = datetime.now() + timedelta(days=1)
 
