@@ -29,3 +29,25 @@ def check_if_user_has_permissions(
             return False
     return True
 
+
+def get_credentials_exceptions(
+    security_scopes: SecurityScopes, forbidden: bool = False
+) -> HTTPException:
+    if security_scopes.scopes:
+        authenticate_value = f"Bearer scopes={security_scopes.scope_str}"
+    else:
+        authenticate_value = "Bearer"
+
+    if forbidden:
+        return HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not enough permissions",
+            headers={"WWW-Authenticate": authenticate_value},
+        )
+
+    return HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Invalid credentials",
+        headers={"WWW-Authenticate": authenticate_value},
+    )
+
