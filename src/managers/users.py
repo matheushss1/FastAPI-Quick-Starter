@@ -41,7 +41,6 @@ class UserManager:
         )
         statement = insert(SQLAlchemyUserInvited).values(
             name=user_invited_creation.name,
-            last_name=user_invited_creation.last_name,
             email=user_invited_creation.email,
             invitation_expires=user_invited_creation.invitation_expires,
             invitation_link=invitation_link,
@@ -71,7 +70,6 @@ class UserManager:
 
         user_creation = UserCreation(
             name=user_invited.name,
-            last_name=user_invited.last_name,
             email=user_invited.email,
             password=user_credentials.password,
         )
@@ -91,7 +89,6 @@ class UserManager:
             raise HTTPException(400, "E-mail already registered")
         statement = insert(SQLAlchemyUser).values(
             name=user_creation.name,
-            last_name=user_creation.last_name,
             email=user_creation.email,
             hashed_password=self.get_password_hash(user_creation.password),
             scopes=["users:self"],
@@ -112,7 +109,6 @@ class UserManager:
         if user:
             return PydanticUser(
                 name=user.name,
-                last_name=user.last_name,
                 email=user.email,
                 scopes=user.scopes,
             )
@@ -127,7 +123,6 @@ class UserManager:
         if user_invited:
             return UserInvited(
                 name=user_invited.name,
-                last_name=user_invited.last_name,
                 email=user_invited.email,
                 invitation_link=user_invited.invitation_link,
                 invitation_expires=user_invited.invitation_expires,
@@ -177,7 +172,6 @@ class UserManager:
             return False
         return PydanticUser(
             name=user.name,
-            last_name=user.last_name,
             email=user.email,
             scopes=user.scopes,
         )
