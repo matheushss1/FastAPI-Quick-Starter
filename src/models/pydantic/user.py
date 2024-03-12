@@ -1,12 +1,11 @@
 from datetime import datetime, timedelta
-from typing import List, Optional
+from typing import Optional
 
 from pydantic import BaseModel
 
 
 class User(BaseModel):
     name: str
-    last_name: str
     email: str
     scopes: List[str] = ["users:self"]
 
@@ -23,7 +22,6 @@ class UserCredentials(BaseModel):
 
 class UserCreation(BaseModel):
     name: str
-    last_name: str
     email: str
     password: str
 
