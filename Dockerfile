@@ -54,6 +54,8 @@ ENV PATH="/venv/bin:${PATH}"
 
 WORKDIR /code
 
+COPY initialize.py ./
+
 # Copy the ./src directory inside the /code directory.
 # Do this last to leverge docker build caching.
 COPY ./src /code/src
