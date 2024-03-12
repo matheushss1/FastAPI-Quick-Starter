@@ -1,6 +1,5 @@
 from fastapi import status
 from fastapi.testclient import TestClient
-
 from src.config.settings import Settings
 from src.core.email import get_fast_mail
 
