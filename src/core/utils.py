@@ -20,3 +20,12 @@ def get_user_by_email(
         )
     raise credentials_exception
 
+
+def check_if_user_has_permissions(
+    user_scopes: List[str], requested_scopes: List[str]
+) -> bool:
+    for scope in requested_scopes:
+        if scope not in user_scopes:
+            return False
+    return True
+
