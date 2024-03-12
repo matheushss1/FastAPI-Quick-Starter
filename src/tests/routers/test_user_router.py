@@ -22,7 +22,7 @@ def test_create_user_directly(client: TestClient, superuser_token: str):
         "name": "test",
         "last_name": "user",
         "email": "test_creating@test.com",
-        "scopes": ["users:self"],
+        "role": "member",
     }
     assert response.status_code == status.HTTP_201_CREATED
     assert response.json() == expected_response
@@ -113,7 +113,7 @@ def test_confirm_user_invitation(client: TestClient):
     response = client.post("/user/confirm-invitation", json=user_credentials)
     assert response.status_code == 200
     user_with_scopes = USER_INVITED_INFO.copy()
-    user_with_scopes.update({"scopes": ["users:self"]})
+    user_with_scopes.update({"role": "member"})
     assert response.json() == user_with_scopes
 
 
@@ -149,5 +149,5 @@ def test_get_logged_user(client: TestClient):
     )
     assert response.status_code == 200
     user_with_scopes = USER_INVITED_INFO.copy()
-    user_with_scopes.update({"scopes": ["users:self"]})
+    user_with_scopes.update({"role": "member"})
     assert response.json() == user_with_scopes
