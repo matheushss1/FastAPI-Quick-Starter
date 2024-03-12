@@ -78,7 +78,7 @@ class UserManager:
     def create_user(self, user_creation: UserCreation) -> PydanticUser:
         """
         Creates a user directly by inputting
-        the name, last_name, email and password.
+        the name, email, role and password.
         """
         user_in_db = (
             self.db.query(SQLAlchemyUser)
@@ -91,7 +91,7 @@ class UserManager:
             name=user_creation.name,
             email=user_creation.email,
             hashed_password=self.get_password_hash(user_creation.password),
-            scopes=["users:self"],
+            role="member",
         )
         self.db.execute(statement)
         self.db.commit()
@@ -110,7 +110,7 @@ class UserManager:
             return PydanticUser(
                 name=user.name,
                 email=user.email,
-                scopes=user.scopes,
+                role=user.role,
             )
         raise HTTPException(404, "User not found")
 
@@ -173,7 +173,7 @@ class UserManager:
         return PydanticUser(
             name=user.name,
             email=user.email,
-            scopes=user.scopes,
+            role=user.role,
         )
 
     def create_access_token(
