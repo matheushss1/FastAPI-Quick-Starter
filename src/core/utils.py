@@ -51,3 +51,22 @@ def get_credentials_exceptions(
         headers={"WWW-Authenticate": authenticate_value},
     )
 
+
+def get_user_scopes(role: str, oauth2_scopes=Dict[str, str]) -> List[str]:
+    all_scopes = list(oauth2_scopes.keys())
+    role_scopes = {
+        "admin": all_scopes,
+        "manager": [
+            scope for scope in all_scopes if scope.split(":")[-1] != "all"
+        ],
+        "user": [
+            scope
+            for scope in all_scopes
+            if scope.split(":")[-1] not in ["all", "rw"]
+        ],
+        "member": [
+            scope for scope in all_scopes if scope.split(":")[-1] == "self"
+        ],
+    }
+    return role_scopes.get(role)
+
