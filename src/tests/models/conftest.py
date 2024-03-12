@@ -11,7 +11,6 @@ def user_fixture(session: Session) -> Generator[User, None, None]:
     password_hash = UserManager(session).get_password_hash("testpass")
     user = User(
         name="Test",
-        last_name="User",
         email="test@test.com",
         hashed_password=password_hash,
         role="member",

@@ -7,7 +7,6 @@ from src.core.email import get_fast_mail
 def test_create_user_directly(client: TestClient, superuser_token: str):
     user_info = {
         "name": "test",
-        "last_name": "user",
         "email": "test_creating@test.com",
         "password": "testpass",
     }
@@ -20,7 +19,6 @@ def test_create_user_directly(client: TestClient, superuser_token: str):
 
     expected_response = {
         "name": "test",
-        "last_name": "user",
         "email": "test_creating@test.com",
         "role": "member",
     }
@@ -31,7 +29,6 @@ def test_create_user_directly(client: TestClient, superuser_token: str):
 def test_create_user_directly_fails_without_token(client: TestClient):
     user_info = {
         "name": "test",
-        "last_name": "user",
         "email": "test_creating@test.com",
         "password": "testpass",
     }
@@ -52,7 +49,6 @@ def test_create_user_directly_fails_not_enough_permissions(client: TestClient):
     token = token_response.json().get("access_token")
     user_info = {
         "name": "test",
-        "last_name": "user",
         "email": "test_should_fail@test.com",
         "password": "testpass",
     }
@@ -68,7 +64,6 @@ def test_create_user_directly_fails_not_enough_permissions(client: TestClient):
 
 USER_INVITED_INFO = {
     "name": "test",
-    "last_name": "user",
     "email": "user-invited@email.com",
 }
 

@@ -14,7 +14,6 @@ def superuser_fixture(session: Session) -> Generator[User, None, None]:
     password_hash = UserManager(session).get_password_hash(PASSWORD)
     user = User(
         name="Test User",
-        last_name="From Tests",
         email="testuser@test.com",
         hashed_password=password_hash,
         role="admin",
