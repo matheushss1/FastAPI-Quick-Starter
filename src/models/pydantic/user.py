@@ -7,7 +7,7 @@ from pydantic import BaseModel
 class User(BaseModel):
     name: str
     email: str
-    scopes: List[str] = ["users:self"]
+    role: str
 
 
 class UserInvited(BaseModel):
