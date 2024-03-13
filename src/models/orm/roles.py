@@ -10,5 +10,6 @@ class Role(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
+    description = Column(String, nullable=False)
     module = Column(Enum(*MODULES, name="modules"), nullable=False)
     mode = Column(Enum(*MODES, name="modes"), nullable=False)
