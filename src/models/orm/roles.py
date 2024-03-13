@@ -9,6 +9,6 @@ class Role(Base):
     __tablename__ = "roles"
 
     id = Column(Integer, primary_key=True)
-    name = Column(String, nullable=False, unique=True)
+    name = Column(String, nullable=False)
     module = Column(Enum(*MODULES, name="modules"), nullable=False)
     mode = Column(Enum(*MODES, name="modes"), nullable=False)
