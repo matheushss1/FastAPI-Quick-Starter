@@ -17,6 +17,7 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
+from src.models.orm.roles import Role  # noqa
 from src.models.orm.user import User, UserInvited  # noqa
 
 target_metadata = Base.metadata
