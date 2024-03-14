@@ -1,10 +1,13 @@
-from typing import Generator
+from datetime import datetime, timedelta
+from typing import Generator, List
 
 from fastapi.testclient import TestClient
 from pytest import fixture
+from sqlalchemy import and_
 from sqlalchemy.orm import Session
+from src.core.utils import generate_role_description, generate_role_name
 from src.managers.users import UserManager
-from src.models.orm.user import User
+from src.models.orm.user import MODES, MODULES, Role, User, UserInvited
 
 PASSWORD = "testpass"
 
