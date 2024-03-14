@@ -4,9 +4,9 @@ from fastapi import APIRouter, Depends, HTTPException, Security, status
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi_mail import FastMail, MessageSchema, MessageType
 from sqlalchemy.orm import Session
-from src.core.dependencies import get_current_user, get_db
+from src.core.dependencies import get_db
 from src.core.email import get_fast_mail
-from src.core.security import OAUTH2_SCOPES
+from src.core.security import get_current_user
 from src.core.utils import get_user_scopes
 from src.managers.users import UserManager
 from src.models.pydantic.user import (
