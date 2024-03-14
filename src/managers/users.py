@@ -178,24 +178,29 @@ class UserManager:
 
     def authenticate_user(
         self, email: str, password: str
-    ) -> PydanticUser | Literal[False]:
+    ) -> UserPydantic | Literal[False]:
         """
         Checks if user and password are correct.
         """
-        user_list = (
-            self.db.query(SQLAlchemyUser)
-            .filter(SQLAlchemyUser.email == email)
-            .all()
-        )
+        user_list = self.db.query(UserOrm).filter(UserOrm.email == email).all()
         if not len(user_list) == 1:
             return False
         user = user_list[0]
         if not self.verify_password(password, user.hashed_password):
             return False
-        return PydanticUser(
+        user_roles = [
+            RolePydantic(
+                name=role.name,
+                description=role.description,
+                module=role.module,
+                mode=role.mode,
+            )
+            for role in user.roles
+        ]
+        return UserPydantic(
             name=user.name,
             email=user.email,
-            role=user.role,
+            roles=user_roles,
         )
 
     def create_access_token(
