@@ -60,16 +60,15 @@ class UserManager:
 
     def confirm_invitation(
         self, user_credentials: UserCredentials
-    ) -> PydanticUser:
+    ) -> UserPydantic:
         """
         Creates the user and deletes the user_invited
         """
         user_invited = self.get_db_user_invited_by_email(
             user_credentials.email
         )
-
-        statement = delete(SQLAlchemyUserInvited).where(
-            SQLAlchemyUserInvited.email == user_invited.email
+        statement = delete(UserInvitedORM).where(
+            UserInvitedORM.email == user_invited.email
         )
         self.db.execute(statement)
         self.db.commit()
@@ -81,6 +80,7 @@ class UserManager:
             name=user_invited.name,
             email=user_invited.email,
             password=user_credentials.password,
+            roles_ids=user_invited.roles_ids,
         )
         return self.create_user(user_creation)
 
