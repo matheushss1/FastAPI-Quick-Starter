@@ -82,3 +82,19 @@ def role_user_member_fixture(session: Session) -> Role:
     session.add(role)
     session.commit()
     return role
+
+
+@fixture(name="user_invited")
+def user_invited_fixture(
+    session: Session, role_user_member: Role
+) -> Generator[UserInvited, None, None]:
+    user_invited = UserInvited(
+        name="User Invited Fixture",
+        email="user_invited@fixtures.com",
+        invitation_link="https://fixtures.com",
+        invitation_expires=datetime.now() + timedelta(days=1),
+    )
+    user_invited.roles.append(role_user_member)
+    session.add(user_invited)
+    session.commit()
+    return user_invited
