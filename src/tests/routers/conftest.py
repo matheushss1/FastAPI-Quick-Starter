@@ -12,6 +12,25 @@ from src.models.orm.user import MODES, MODULES, Role, User, UserInvited
 PASSWORD = "testpass"
 
 
+@fixture(name="superuser_roles")
+def superuser_roles_fixture(
+    session: Session,
+) -> List[Role]:
+    roles = []
+    for module in MODULES:
+        for mode in MODES:
+            role = Role(
+                name=generate_role_name(mode),
+                description=generate_role_description(module, mode),
+                module=module,
+                mode=mode,
+            )
+            session.add(role)
+            roles.append(role)
+    session.commit()
+    return roles
+
+
 @fixture(name="superuser")
 def superuser_fixture(session: Session) -> Generator[User, None, None]:
     password_hash = UserManager(session).get_password_hash(PASSWORD)
