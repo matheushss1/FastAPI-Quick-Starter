@@ -3,9 +3,9 @@ from typing import List
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 from src.core.database import Base, build_database_uri
+from src.core.utils import generate_role_description, generate_role_name
 from src.managers.users import UserManager
-from src.models.orm.roles import MODES, MODULES, Role
-from src.models.orm.user import User
+from src.models.orm.user import MODES, MODULES, Role, User
 
 INITIAL_PASSWORD = "password"
 
@@ -24,26 +24,6 @@ def user_and_roles_exists(db: Session) -> bool:
     ):
         return False
     return True
-
-
-def generate_role_description(module: str, mode: str) -> str:
-    roles_description_dict = {
-        "self": f"Read/Update own {module}",
-        "r": f"Read information about all {module}",
-        "rw": f"Read/Update information about all {module}",
-        "all": f"All operations allowed for {module}",
-    }
-    return roles_description_dict.get(mode)
-
-
-def generate_role_name(mode: str) -> str:
-    modes_roles_dict = {
-        "all": "admin",
-        "rw": "manager",
-        "r": "user",
-        "self": "member",
-    }
-    return modes_roles_dict.get(mode)
 
 
 def create_roles(db: Session) -> List[Role]:
