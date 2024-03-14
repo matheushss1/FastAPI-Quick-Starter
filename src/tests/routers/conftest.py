@@ -32,19 +32,23 @@ def superuser_roles_fixture(
 
 
 @fixture(name="superuser")
-def superuser_fixture(session: Session) -> Generator[User, None, None]:
+def superuser_fixture(session: Session, superuser_roles: List[Role]) -> User:
+    user_in_db = (
+        session.query(User).where(User.email == "testuser@test.com").all()
+    )
+    if len(user_in_db):
+        return user_in_db[0]
     password_hash = UserManager(session).get_password_hash(PASSWORD)
     user = User(
         name="Test User",
         email="testuser@test.com",
         hashed_password=password_hash,
-        role="admin",
     )
+    for role in superuser_roles:
+        user.roles.append(role)
     session.add(user)
     session.commit()
-    yield user
-    session.delete(user)
-    session.commit()
+    return user
 
 
 @fixture(name="superuser_token")
