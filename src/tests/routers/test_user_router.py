@@ -173,7 +173,7 @@ def test_get_auth_token_with_wrong_credentials(client: TestClient):
     assert response.status_code == 400
 
 
-def test_get_logged_user(client: TestClient):
+def test_get_logged_user(client: TestClient, role_user_member: Role):
     user_credentials = {
         "username": USER_INVITED_INFO.get("email"),
         "password": "testpass",
@@ -185,6 +185,12 @@ def test_get_logged_user(client: TestClient):
         headers={"Authorization": f"Bearer {token}"},
     )
     assert response.status_code == 200
-    user_with_scopes = USER_INVITED_INFO.copy()
-    user_with_scopes.update({"role": "member"})
-    assert response.json() == user_with_scopes
+    user_role = {
+        "name": role_user_member.name,
+        "description": role_user_member.description,
+        "module": role_user_member.module,
+        "mode": role_user_member.mode,
+    }
+    user_with_roles = USER_INVITED_INFO.copy()
+    user_with_roles["roles"] = [user_role]
+    assert response.json() == user_with_roles
