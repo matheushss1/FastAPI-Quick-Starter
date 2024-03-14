@@ -50,7 +50,10 @@ class User(Base):
     name = Column(String, nullable=False)
     email = Column(String, nullable=False, unique=True)
     hashed_password = Column(String, nullable=False)
-    roles: Mapped[List["Role"]] = relationship(secondary=users_roles)
+    roles: Mapped[List["Role"]] = relationship(
+        secondary=users_roles,
+        back_populates="users",
+    )
 
 
 class UserInvited(Base):
