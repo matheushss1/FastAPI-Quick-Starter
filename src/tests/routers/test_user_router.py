@@ -2,6 +2,7 @@ from fastapi import status
 from fastapi.testclient import TestClient
 from src.config.settings import Settings
 from src.core.email import get_fast_mail
+from src.models.orm.user import Role
 
 
 def test_create_user_directly(client: TestClient, superuser_token: str):
