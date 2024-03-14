@@ -68,3 +68,20 @@ class UserInvited(Base):
         secondary=users_invited_roles,
         back_populates="users_invited",
     )
+
+
+class Role(Base):
+    __tablename__ = "roles"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name = Column(String, nullable=False)
+    description = Column(String, nullable=False)
+    module = Column(Enum(*MODULES, name="modules"), nullable=False)
+    mode = Column(Enum(*MODES, name="modes"), nullable=False)
+    users: Mapped[List["User"]] = relationship(
+        secondary=users_roles, back_populates="roles"
+    )
+    users_invited: Mapped[List["UserInvited"]] = relationship(
+        secondary=users_invited_roles,
+        back_populates="roles",
+    )
