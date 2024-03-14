@@ -18,8 +18,28 @@ MODES = ["self", "r", "rw", "all"]
 users_roles = Table(
     "users_roles",
     Base.metadata,
-    Column("user_id", ForeignKey("users.id"), primary_key=True),
-    Column("role_id", ForeignKey("roles.id"), primary_key=True),
+    Column(
+        "user_id", ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    ),
+    Column(
+        "role_id", ForeignKey("roles.id", ondelete="CASCADE"), primary_key=True
+    ),
+)
+
+users_invited_roles = Table(
+    "users_invited_roles",
+    Base.metadata,
+    Column(
+        "user_invited_id",
+        ForeignKey(
+            "users_invited.id",
+            ondelete="CASCADE",
+        ),
+        primary_key=True,
+    ),
+    Column(
+        "role_id", ForeignKey("roles.id", ondelete="CASCADE"), primary_key=True
+    ),
 )
 
 
