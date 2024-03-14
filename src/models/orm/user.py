@@ -11,7 +11,9 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from src.core.database import Base
-from src.models.orm.roles import Role
+
+MODULES = ["users"]
+MODES = ["self", "r", "rw", "all"]
 
 users_roles = Table(
     "users_roles",
