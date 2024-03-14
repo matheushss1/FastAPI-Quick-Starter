@@ -5,11 +5,14 @@ from src.core.email import get_fast_mail
 from src.models.orm.user import Role
 
 
-def test_create_user_directly(client: TestClient, superuser_token: str):
+def test_create_user_directly(
+    client: TestClient, superuser_token: str, role_user_member: Role
+):
     user_info = {
         "name": "test",
         "email": "test_creating@test.com",
         "password": "testpass",
+        "roles_ids": [role_user_member.id],
     }
 
     response = client.post(
@@ -21,7 +24,14 @@ def test_create_user_directly(client: TestClient, superuser_token: str):
     expected_response = {
         "name": "test",
         "email": "test_creating@test.com",
-        "role": "member",
+        "roles": [
+            {
+                "name": role_user_member.name,
+                "description": role_user_member.description,
+                "module": role_user_member.module,
+                "mode": role_user_member.mode,
+            }
+        ],
     }
     assert response.status_code == status.HTTP_201_CREATED
     assert response.json() == expected_response
