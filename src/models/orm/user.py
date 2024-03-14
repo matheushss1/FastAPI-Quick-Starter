@@ -1,6 +1,14 @@
 from typing import List
 
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Table
+from sqlalchemy import (
+    Column,
+    DateTime,
+    Enum,
+    ForeignKey,
+    Integer,
+    String,
+    Table,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from src.core.database import Base
 from src.models.orm.roles import Role
