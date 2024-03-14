@@ -5,12 +5,14 @@ from typing import Literal
 from bcrypt import checkpw, gensalt, hashpw
 from fastapi import HTTPException
 from jose import jwt
-from sqlalchemy import delete, insert
+from sqlalchemy import delete
 from sqlalchemy.orm import Session
 from src.core.dependencies import get_settings
-from src.models.orm.user import User as SQLAlchemyUser
-from src.models.orm.user import UserInvited as SQLAlchemyUserInvited
-from src.models.pydantic.user import User as PydanticUser
+from src.models.orm.user import Role as RoleORM
+from src.models.orm.user import User as UserOrm
+from src.models.orm.user import UserInvited as UserInvitedORM
+from src.models.pydantic.role import Role as RolePydantic
+from src.models.pydantic.user import User as UserPydantic
 from src.models.pydantic.user import UserCreation, UserCredentials, UserInvited
 
 SETTINGS = get_settings()
