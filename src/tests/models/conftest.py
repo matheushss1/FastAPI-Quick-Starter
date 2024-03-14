@@ -20,16 +20,14 @@ def member_users_role_fixture(session: Session) -> Role:
 
 
 @fixture(name="user")
-def user_fixture(session: Session) -> Generator[User, None, None]:
+def user_fixture(session: Session, member_users_role: Role) -> User:
     password_hash = UserManager(session).get_password_hash("testpass")
     user = User(
         name="Test",
         email="test@test.com",
         hashed_password=password_hash,
-        role="member",
     )
+    user.roles.append(member_users_role)
     session.add(user)
     session.commit()
-    yield user
-    session.delete(user)
-    session.commit()
+    return user
