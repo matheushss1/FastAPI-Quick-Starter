@@ -136,16 +136,22 @@ def test_invite_already_invited_user(
         assert response.json().get("detail") == "E-mail already registered"
 
 
-def test_confirm_user_invitation(client: TestClient):
+def test_confirm_user_invitation(client: TestClient, role_user_member: Role):
     user_credentials = {
         "email": USER_INVITED_INFO.get("email"),
         "password": "testpass",
     }
     response = client.post("/user/confirm-invitation", json=user_credentials)
     assert response.status_code == 200
-    user_with_scopes = USER_INVITED_INFO.copy()
-    user_with_scopes.update({"role": "member"})
-    assert response.json() == user_with_scopes
+    user_with_roles = USER_INVITED_INFO.copy()
+    user_role = {
+        "name": role_user_member.name,
+        "description": role_user_member.description,
+        "module": role_user_member.module,
+        "mode": role_user_member.mode,
+    }
+    user_with_roles["roles"] = [user_role]
+    assert response.json() == user_with_roles
 
 
 def test_get_auth_token(client: TestClient):
