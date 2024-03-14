@@ -112,20 +112,25 @@ class UserManager:
         self.db.commit()
         return self.get_db_user_by_email(user_creation.email)
 
-    def get_db_user_by_email(self, email: str) -> PydanticUser:
+    def get_db_user_by_email(self, email: str) -> UserPydantic:
         """
         Query the DB for the user with the given e-mail.
         """
-        user = (
-            self.db.query(SQLAlchemyUser)
-            .filter(SQLAlchemyUser.email == email)
-            .one()
-        )
+        user = self.db.query(UserOrm).filter(UserOrm.email == email).one()
         if user:
-            return PydanticUser(
+            user_roles = [
+                RolePydantic(
+                    name=role.name,
+                    description=role.description,
+                    module=role.module,
+                    mode=role.mode,
+                )
+                for role in user.roles
+            ]
+            return UserPydantic(
                 name=user.name,
                 email=user.email,
-                role=user.role,
+                roles=user_roles,
             )
         raise HTTPException(404, "User not found")
 
