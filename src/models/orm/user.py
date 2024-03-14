@@ -64,3 +64,7 @@ class UserInvited(Base):
     email = Column(String, nullable=False, unique=True)
     invitation_link = Column(String, nullable=False)
     invitation_expires = Column(DateTime, nullable=False)
+    roles: Mapped[List["Role"]] = relationship(
+        secondary=users_invited_roles,
+        back_populates="users_invited",
+    )
