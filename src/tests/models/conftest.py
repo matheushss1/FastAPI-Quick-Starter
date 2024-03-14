@@ -3,7 +3,20 @@ from typing import Generator
 from pytest import fixture
 from sqlalchemy.orm import Session
 from src.managers.users import UserManager
-from src.models.orm.user import User
+from src.models.orm.user import Role, User
+
+
+@fixture(name="member_users_role")
+def member_users_role_fixture(session: Session) -> Role:
+    role = Role(
+        name="member",
+        description="Read/Update self",
+        module="users",
+        mode="self",
+    )
+    session.add(role)
+    session.commit()
+    return role
 
 
 @fixture(name="user")
