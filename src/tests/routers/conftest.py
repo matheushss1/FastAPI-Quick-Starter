@@ -62,3 +62,23 @@ def superuser_token_fixture(client: TestClient, superuser: User) -> str:
         },
     )
     return response.json().get("access_token")
+
+
+@fixture(name="role_user_member")
+def role_user_member_fixture(session: Session) -> Role:
+    role_in_db = (
+        session.query(Role)
+        .where(and_(Role.module == "users", Role.mode == "self"))
+        .all()
+    )
+    if len(role_in_db):
+        return role_in_db[0]
+    role = Role(
+        name=generate_role_name(mode="self"),
+        description=generate_role_description(module="users", mode="self"),
+        module="users",
+        mode="self",
+    )
+    session.add(role)
+    session.commit()
+    return role
