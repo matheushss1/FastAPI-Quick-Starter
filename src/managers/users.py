@@ -32,8 +32,8 @@ class UserManager:
         Creates a user_invited
         """
         user_invited_in_db = (
-            self.db.query(SQLAlchemyUserInvited)
-            .filter(SQLAlchemyUserInvited.email == user_invited_creation.email)
+            self.db.query(UserInvitedORM)
+            .filter(UserInvitedORM.email == user_invited_creation.email)
             .all()
         )
         if len(user_invited_in_db):
@@ -41,13 +41,20 @@ class UserManager:
         invitation_link = self.create_invitation_link(
             user_invited_creation.email,
         )
-        statement = insert(SQLAlchemyUserInvited).values(
+        user_invited_roles = (
+            self.db.query(RoleORM)
+            .where(RoleORM.id.in_(user_invited_creation.roles_ids))
+            .all()
+        )
+        user_invited = UserInvitedORM(
             name=user_invited_creation.name,
             email=user_invited_creation.email,
             invitation_expires=user_invited_creation.invitation_expires,
             invitation_link=invitation_link,
         )
-        self.db.execute(statement)
+        for role in user_invited_roles:
+            user_invited.roles.append(role)
+        self.db.add(user_invited)
         self.db.commit()
         return self.get_db_user_invited_by_email(user_invited_creation.email)
 
