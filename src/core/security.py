@@ -16,3 +16,43 @@ from src.core.utils import (
 )
 from src.models.pydantic.user import User
 
+
+def get_current_user(
+    security_scopes: SecurityScopes,
+    token: Annotated[str, Depends(oauth2_scheme)],
+    db: Session = Depends(get_db),
+) -> User:
+    """
+    Decodes the JWT and checks for the authenticated
+    user that is performing the request. Also checks the permission scopes.
+    """
+    SETTINGS = get_settings()
+    SECRET_KEY = SETTINGS.SECRET_KEY
+    ALGORITHM = SETTINGS.ALGORITHM
+
+    credentials_exception = get_credentials_exceptions(security_scopes)
+
+    email = get_email_by_decoded_jwt(
+        token=token,
+        secret_key=SECRET_KEY,
+        algorithm=ALGORITHM,
+        credentials_exception=credentials_exception,
+    )
+
+    user = get_user_by_email(
+        db=db, email=email, credentials_exception=credentials_exception
+    )
+
+    user_scopes = get_user_scopes(roles=user.roles)
+
+    user_has_permissions = check_if_user_has_permissions(
+        user_scopes=user_scopes, requested_scopes=security_scopes.scopes
+    )
+
+    if not user_has_permissions:
+        forbidden_exception = get_credentials_exceptions(
+            security_scopes, forbidden=True
+        )
+        raise forbidden_exception
+
+    return user
