@@ -135,17 +135,19 @@ class UserManager:
         raise HTTPException(404, "User not found")
 
     def get_db_user_invited_by_email(self, email: str) -> UserInvited:
-        user_invited = (
-            self.db.query(SQLAlchemyUserInvited)
-            .filter(SQLAlchemyUserInvited.email == email)
-            .one()
+        user_invited_list = (
+            self.db.query(UserInvitedORM)
+            .filter(UserInvitedORM.email == email)
+            .all()
         )
-        if user_invited:
+        if len(user_invited_list) == 1:
+            user_invited = user_invited_list[0]
             return UserInvited(
                 name=user_invited.name,
                 email=user_invited.email,
                 invitation_link=user_invited.invitation_link,
                 invitation_expires=user_invited.invitation_expires,
+                roles_ids=[role.id for role in user_invited.roles],
             )
         raise HTTPException(404, "User Invited not found")
 
