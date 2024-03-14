@@ -84,25 +84,31 @@ class UserManager:
         )
         return self.create_user(user_creation)
 
-    def create_user(self, user_creation: UserCreation) -> PydanticUser:
+    def create_user(self, user_creation: UserCreation) -> UserPydantic:
         """
         Creates a user directly by inputting
         the name, email, role and password.
         """
         user_in_db = (
-            self.db.query(SQLAlchemyUser)
-            .filter(SQLAlchemyUser.email == user_creation.email)
+            self.db.query(UserOrm)
+            .filter(UserOrm.email == user_creation.email)
             .all()
         )
         if len(user_in_db):
             raise HTTPException(400, "E-mail already registered")
-        statement = insert(SQLAlchemyUser).values(
+        user_roles = (
+            self.db.query(RoleORM)
+            .where(RoleORM.id.in_(user_creation.roles_ids))
+            .all()
+        )
+        user = UserOrm(
             name=user_creation.name,
             email=user_creation.email,
             hashed_password=self.get_password_hash(user_creation.password),
-            role="member",
         )
-        self.db.execute(statement)
+        for role in user_roles:
+            user.roles.append(role)
+        self.db.add(user)
         self.db.commit()
         return self.get_db_user_by_email(user_creation.email)
 
