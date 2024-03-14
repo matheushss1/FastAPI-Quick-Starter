@@ -17,6 +17,19 @@ from src.core.utils import (
 from src.models.pydantic.user import User
 
 
+def get_oauth2_scopes() -> dict[str, str]:
+    with closing(get_db()) as db:
+        roles = get_all_roles(next(db, None))
+        return parse_scopes(roles)
+
+
+OAUTH2_SCOPES = get_oauth2_scopes()
+
+oauth2_scheme = OAuth2PasswordBearer(
+    tokenUrl="/user/token", scopes=OAUTH2_SCOPES
+)
+
+
 def get_current_user(
     security_scopes: SecurityScopes,
     token: Annotated[str, Depends(oauth2_scheme)],
