@@ -11,6 +11,10 @@ class User(BaseModel):
     roles: List[Role]
 
 
+class UserUpdating(BaseModel):
+    name: Optional[str]
+
+
 class UserInvited(BaseModel):
     name: str
     email: str
