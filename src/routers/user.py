@@ -76,12 +76,6 @@ async def login(
     user = user_manager.authenticate_user(
         email=user_credentials.username, password=user_credentials.password
     )
-    if not user:
-        raise HTTPException(
-            400,
-            "Incorrect e-mail or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
     user_scopes = get_user_scopes(roles=user.roles)
     data = {"sub": user.email, "scopes": user_scopes}
     access_token = user_manager.create_access_token(data)
