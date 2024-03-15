@@ -42,3 +42,20 @@ def get_db_single_object_by_email(
     if not objects_len:
         raise exception
     return objects[0]
+
+
+def get_db_list_of_objects_by_list_of_ids(
+    db: Session, model: Any, list_of_ids: List[int]
+) -> List[Any]:
+    """
+    Retrieves a list of objects from the database based on the provided list of IDs.
+
+    Args:
+        db (Session): The SQLAlchemy database session.
+        model (Any): The SQLAlchemy model representing the database table.
+        list_of_ids (List[int]): A list of integer IDs to filter the objects.
+
+    Returns:
+        List[Any]: A list of objects from the database matching the provided IDs.
+    """
+    return db.query(model).where(model.id.in_(list_of_ids)).all()
