@@ -160,14 +160,20 @@ class UserManager:
 
     def verify_password(
         self, plain_password: str, hashed_password: str
-    ) -> bool:
+    ) -> None:
         """
         Checks if password is correct.
         """
         password_byte_enc = plain_password.encode("utf-8")
         hashed_password = hashed_password.encode()
-        return checkpw(
+        if checkpw(
             password=password_byte_enc, hashed_password=hashed_password
+        ):
+            return
+        raise HTTPException(
+            400,
+            "Incorrect e-mail or password",
+            headers={"WWW-Authenticate": "Bearer"},
         )
 
     def get_password_hash(self, password: str) -> str:
@@ -195,6 +201,7 @@ class UserManager:
                 headers={"WWW-Authenticate": "Bearer"},
             ),
         )
+        _ = self.verify_password(password, user.hashed_password)
         user_roles = [
             RolePydantic(
                 name=role.name,
