@@ -44,3 +44,12 @@ def test_delete_user(
     user_query = session.query(User).where(User.id == user_member.id).all()
     assert response.status_code == 204
     assert not len(user_query)
+
+
+def test_delete_user_raising_404(client: TestClient, superuser_token: str):
+    response = client.delete(
+        "/user/1000",
+        headers={"Authorization": f"Bearer {superuser_token}"},
+    )
+    assert response.status_code == 404
+    assert response.json().get("detail") == "Couldn't find user."
