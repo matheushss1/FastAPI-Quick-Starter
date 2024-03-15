@@ -5,19 +5,25 @@ from typing import Literal
 from bcrypt import checkpw, gensalt, hashpw
 from fastapi import HTTPException
 from jose import jwt
-from sqlalchemy import delete
+from sqlalchemy import delete, update
 from sqlalchemy.orm import Session
 from src.core.dependencies import get_settings
 from src.managers.utils import (
     get_db_list_of_objects_by_list_of_ids,
     get_db_single_object_by_email,
+    get_db_single_object_by_id,
 )
 from src.models.orm.user import Role as RoleORM
 from src.models.orm.user import User as UserOrm
 from src.models.orm.user import UserInvited as UserInvitedORM
 from src.models.pydantic.role import Role as RolePydantic
 from src.models.pydantic.user import User as UserPydantic
-from src.models.pydantic.user import UserCreation, UserCredentials, UserInvited
+from src.models.pydantic.user import (
+    UserCreation,
+    UserCredentials,
+    UserInvited,
+    UserUpdating,
+)
 
 SETTINGS = get_settings()
 SECRET_KEY = SETTINGS.SECRET_KEY
