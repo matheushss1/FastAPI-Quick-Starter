@@ -93,3 +93,12 @@ async def get_logged_user(
     db: Session = Depends(get_db),
 ) -> User:
     return UserManager(db).get_db_user_by_email(user.email)
+
+
+@router.put("/me", response_model=User, status_code=status.HTTP_200_OK)
+async def update_logged_user(
+    updates: UserUpdating,
+    db: Session = Depends(get_db),
+    user: User = Security(get_current_user, scopes=["users:self"]),
+) -> User:
+    return UserManager(db).update_user(updates, user)
