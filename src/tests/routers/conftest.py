@@ -102,6 +102,13 @@ def user_invited_fixture(
 
 @fixture(name="user_member")
 def user_member_fixture(session: Session, role_user_member: Role) -> User:
+    user_in_db = (
+        session.query(User)
+        .where(User.email == "user_testing@fixture.com")
+        .all()
+    )
+    if len(user_in_db):
+        return user_in_db[0]
     password_hash = UserManager(session).get_password_hash(PASSWORD)
     user = User(
         name="User Testing Fixture",
