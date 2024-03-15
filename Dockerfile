@@ -54,7 +54,9 @@ ENV PATH="/venv/bin:${PATH}"
 
 WORKDIR /code
 
-COPY initialize.py ./
+COPY initialize.py entrypoint.sh ./
+
+RUN ["chmod", "+x" , "./entrypoint.sh"]
 
 # Copy the ./src directory inside the /code directory.
 # Do this last to leverge docker build caching.
@@ -62,4 +64,4 @@ COPY ./src /code/src
 
 EXPOSE $PORT
 
-CMD uvicorn src.main:app --host 0.0.0.0 --port $PORT
+ENTRYPOINT ["./entrypoint.sh"]
