@@ -11,13 +11,13 @@ def test_update_user_name(
 ):
     update_dict = {"name": "User Testing Fixture Name"}
     response = client.put(
-        f"/user/{user_member.id}",
+        "/user/me",
         headers={"Authorization": f"Bearer {user_member_token}"},
-        data=update_dict,
+        json=update_dict,
     )
     expected_response = {
         "name": "User Testing Fixture Name",
-        "email": user_member,
+        "email": user_member.email,
         "roles": [
             {
                 "name": role_user_member.name,
