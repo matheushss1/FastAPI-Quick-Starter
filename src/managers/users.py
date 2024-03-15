@@ -145,6 +145,23 @@ class UserManager:
             roles=user_roles,
         )
 
+    def update_user(
+        self, updating: UserUpdating, user: UserPydantic
+    ) -> UserPydantic:
+        user_to_be_updated = get_db_single_object_by_email(
+            db=self.db,
+            model=UserOrm,
+            email=user.email,
+            exception=HTTPException(500, "Something is really wrong"),
+        )
+        statement = (
+            update(UserOrm)
+            .where(UserOrm.id == user_to_be_updated.id)
+            .values(**updating.model_dump(exclude_unset=True))
+        )
+        self.db.execute(statement)
+        self.db.commit()
+        return self.get_db_user_by_email(user.email)
     def get_db_user_invited_by_email(self, email: str) -> UserInvited:
         user_invited = get_db_single_object_by_email(
             db=self.db,
