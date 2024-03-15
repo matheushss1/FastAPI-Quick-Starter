@@ -162,6 +162,19 @@ class UserManager:
         self.db.execute(statement)
         self.db.commit()
         return self.get_db_user_by_email(user.email)
+
+    def delete_user(self, id: int) -> None:
+        _ = get_db_single_object_by_id(
+            db=self.db,
+            model=UserOrm,
+            id=id,
+            exception=HTTPException(404, "Couldn't find user."),
+        )
+        statement = delete(UserOrm).where(UserOrm.id == id)
+        self.db.execute(statement)
+        self.db.commit()
+        return
+
     def get_db_user_invited_by_email(self, email: str) -> UserInvited:
         user_invited = get_db_single_object_by_email(
             db=self.db,
