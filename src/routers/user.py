@@ -102,3 +102,12 @@ async def update_logged_user(
     user: User = Security(get_current_user, scopes=["users:self"]),
 ) -> User:
     return UserManager(db).update_user(updates, user)
+
+
+@router.delete(
+    "/{id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Security(get_current_user, scopes=["users:all"])],
+)
+async def delete_user(id: int, db: Session = Depends(get_db)) -> None:
+    return UserManager(db).delete_user(id)
