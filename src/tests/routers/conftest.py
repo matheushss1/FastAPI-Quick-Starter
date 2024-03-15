@@ -98,3 +98,30 @@ def user_invited_fixture(
     session.add(user_invited)
     session.commit()
     return user_invited
+
+
+@fixture(name="user_member")
+def user_member_fixture(session: Session, role_user_member: Role) -> User:
+    password_hash = UserManager(session).get_password_hash(PASSWORD)
+    user = User(
+        name="User Testing Fixture",
+        email="user_testing@fixture.com",
+        hashed_password=password_hash,
+    )
+    user.roles.append(role_user_member)
+    session.add(user)
+    session.commit()
+    return user
+
+
+@fixture(name="user_member_token")
+def user_member_token_fixture(client: TestClient, user_member: User) -> str:
+    response = client.post(
+        "/user/token",
+        data={
+            "username": user_member.email,
+            "password": PASSWORD,
+            "scope": "users:self",
+        },
+    )
+    return response.json().get("access_token")
