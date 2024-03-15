@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Security, status
+from fastapi import APIRouter, Depends, Security, status
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi_mail import FastMail, MessageSchema, MessageType
 from sqlalchemy.orm import Session
@@ -15,6 +15,7 @@ from src.models.pydantic.user import (
     UserCreation,
     UserCredentials,
     UserInvited,
+    UserUpdating,
 )
 
 router = APIRouter(prefix="/user")
