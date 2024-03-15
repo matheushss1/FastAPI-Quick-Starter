@@ -35,20 +35,20 @@ class UserManager:
         """
         Creates a user_invited
         """
-        user_invited_in_db = (
-            self.db.query(UserInvitedORM)
-            .filter(UserInvitedORM.email == user_invited_creation.email)
-            .all()
+        _ = get_db_single_object_by_email(
+            db=self.db,
+            model=UserInvitedORM,
+            email=user_invited_creation.email,
+            exception=HTTPException(400, "E-mail already registered"),
+            expect_none=True,
         )
-        if len(user_invited_in_db):
-            raise HTTPException(400, "E-mail already registered")
         invitation_link = self.create_invitation_link(
             user_invited_creation.email,
         )
-        user_invited_roles = (
-            self.db.query(RoleORM)
-            .where(RoleORM.id.in_(user_invited_creation.roles_ids))
-            .all()
+        user_invited_roles = get_db_list_of_objects_by_list_of_ids(
+            db=self.db,
+            model=RoleORM,
+            list_of_ids=user_invited_creation.roles_ids,
         )
         user_invited = UserInvitedORM(
             name=user_invited_creation.name,
@@ -93,17 +93,15 @@ class UserManager:
         Creates a user directly by inputting
         the name, email, role and password.
         """
-        user_in_db = (
-            self.db.query(UserOrm)
-            .filter(UserOrm.email == user_creation.email)
-            .all()
+        _ = get_db_single_object_by_email(
+            db=self.db,
+            model=UserOrm,
+            email=user_creation.email,
+            exception=HTTPException(400, "E-mail already registered"),
+            expect_none=True,
         )
-        if len(user_in_db):
-            raise HTTPException(400, "E-mail already registered")
-        user_roles = (
-            self.db.query(RoleORM)
-            .where(RoleORM.id.in_(user_creation.roles_ids))
-            .all()
+        user_roles = get_db_list_of_objects_by_list_of_ids(
+            db=self.db, model=RoleORM, list_of_ids=user_creation.roles_ids
         )
         user = UserOrm(
             name=user_creation.name,
@@ -120,40 +118,41 @@ class UserManager:
         """
         Query the DB for the user with the given e-mail.
         """
-        user = self.db.query(UserOrm).filter(UserOrm.email == email).one()
-        if user:
-            user_roles = [
-                RolePydantic(
-                    name=role.name,
-                    description=role.description,
-                    module=role.module,
-                    mode=role.mode,
-                )
-                for role in user.roles
-            ]
-            return UserPydantic(
-                name=user.name,
-                email=user.email,
-                roles=user_roles,
+        user = get_db_single_object_by_email(
+            db=self.db,
+            model=UserOrm,
+            email=email,
+            exception=HTTPException(404, "User not found"),
+        )
+        user_roles = [
+            RolePydantic(
+                name=role.name,
+                description=role.description,
+                module=role.module,
+                mode=role.mode,
             )
-        raise HTTPException(404, "User not found")
+            for role in user.roles
+        ]
+        return UserPydantic(
+            name=user.name,
+            email=user.email,
+            roles=user_roles,
+        )
 
     def get_db_user_invited_by_email(self, email: str) -> UserInvited:
-        user_invited_list = (
-            self.db.query(UserInvitedORM)
-            .filter(UserInvitedORM.email == email)
-            .all()
+        user_invited = get_db_single_object_by_email(
+            db=self.db,
+            model=UserInvitedORM,
+            email=email,
+            exception=HTTPException(404, "User Invited not found"),
         )
-        if len(user_invited_list) == 1:
-            user_invited = user_invited_list[0]
-            return UserInvited(
-                name=user_invited.name,
-                email=user_invited.email,
-                invitation_link=user_invited.invitation_link,
-                invitation_expires=user_invited.invitation_expires,
-                roles_ids=[role.id for role in user_invited.roles],
-            )
-        raise HTTPException(404, "User Invited not found")
+        return UserInvited(
+            name=user_invited.name,
+            email=user_invited.email,
+            invitation_link=user_invited.invitation_link,
+            invitation_expires=user_invited.invitation_expires,
+            roles_ids=[role.id for role in user_invited.roles],
+        )
 
     def create_invitation_link(self, email: str) -> str:
         encoded = md5(email.encode())
@@ -186,12 +185,16 @@ class UserManager:
         """
         Checks if user and password are correct.
         """
-        user_list = self.db.query(UserOrm).filter(UserOrm.email == email).all()
-        if not len(user_list) == 1:
-            return False
-        user = user_list[0]
-        if not self.verify_password(password, user.hashed_password):
-            return False
+        user = get_db_single_object_by_email(
+            db=self.db,
+            model=UserOrm,
+            email=email,
+            exception=HTTPException(
+                400,
+                "Incorrect e-mail or password",
+                headers={"WWW-Authenticate": "Bearer"},
+            ),
+        )
         user_roles = [
             RolePydantic(
                 name=role.name,
