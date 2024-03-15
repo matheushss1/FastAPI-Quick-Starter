@@ -8,6 +8,10 @@ from jose import jwt
 from sqlalchemy import delete
 from sqlalchemy.orm import Session
 from src.core.dependencies import get_settings
+from src.managers.utils import (
+    get_db_list_of_objects_by_list_of_ids,
+    get_db_single_object_by_email,
+)
 from src.models.orm.user import Role as RoleORM
 from src.models.orm.user import User as UserOrm
 from src.models.orm.user import UserInvited as UserInvitedORM
