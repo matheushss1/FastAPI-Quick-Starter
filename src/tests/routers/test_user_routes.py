@@ -1,5 +1,7 @@
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
+from src.config.settings import Settings
+from src.core.email import get_fast_mail
 from src.models.orm.user import Role, User
 
 
@@ -53,3 +55,25 @@ def test_delete_user_raising_404(client: TestClient, superuser_token: str):
     )
     assert response.status_code == 404
     assert response.json().get("detail") == "Couldn't find user."
+
+
+def test_request_password_change(
+    client: TestClient,
+    settings: Settings,
+    user_member: User,
+    user_member_token: str,
+):
+    fast_mail = get_fast_mail()
+    fast_mail.config.SUPPRESS_SEND = 1
+    with fast_mail.record_messages() as outbox:
+        response = client.get(
+            "/user/me/request-password-change",
+            headers={"Authorization": f"Bearer {user_member_token}"},
+        )
+        assert response.status_code == 200
+        assert len(outbox) == 1
+        assert (
+            outbox[0]["from"]
+            == f"{settings.MAIL_FROM_NAME} <{settings.MAIL_FROM}>"
+        )
+        assert outbox[0]["To"] == user_member.email
