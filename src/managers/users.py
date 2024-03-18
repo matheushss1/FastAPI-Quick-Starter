@@ -52,7 +52,7 @@ class UserManager:
             exception=HTTPException(400, "E-mail already registered"),
             expect_none=True,
         )
-        invitation_link = self.create_invitation_link(
+        invitation_link = self.create_user_link(
             user_invited_creation.email,
         )
         user_invited_roles = get_db_list_of_objects_by_list_of_ids(
@@ -194,9 +194,58 @@ class UserManager:
             roles_ids=[role.id for role in user_invited.roles],
         )
 
-    def create_invitation_link(self, email: str) -> str:
+    def create_password_change_request(
+        self, user: UserPydantic
+    ) -> PasswordRequestPydantic:
+        user_db = get_db_single_object_by_email(
+            db=self.db,
+            model=UserOrm,
+            email=user.email,
+            exception=HTTPException(500, "Something is really wrong."),
+        )
+        if user_db.password_change_request:
+            old_password_change_request = user_db.password_change_request
+            if not self.deleted_expired_password_request(
+                old_password_change_request
+            ):
+                raise HTTPException(
+                    400,
+                    (
+                        "Password change already requested."
+                        " Please check your e-mail."
+                    ),
+                )
+        link = self.create_user_link(
+            email=user.email, is_password_change_request=True
+        )
+        expiration = datetime.now() + timedelta(hours=1)
+        password_change_request = PasswordRequestORM(
+            link=link, expiration=expiration, user_id=user_db.id
+        )
+        self.db.add(password_change_request)
+        self.db.commit()
+        return PasswordRequestPydantic(
+            link=link, expiration=expiration, user_id=user_db.id
+        )
+
+    def deleted_expired_password_request(
+        self, password_change_request: PasswordRequestORM
+    ) -> bool:
+        if password_change_request.expiration < datetime.now():
+            statement = delete(PasswordRequestORM).where(
+                PasswordRequestORM.id == password_change_request.id
+            )
+            self.db.execute(statement)
+            self.db.commit()
+            return True
+        return False
+
+    def create_user_link(
+        self, email: str, is_password_change_request: bool = False
+    ) -> str:
         encoded = md5(email.encode())
-        return SETTINGS.FRONTEND_URL + "invitations/" + encoded.hexdigest()
+        path = "invitations/" if not is_password_change_request else "request/"
+        return SETTINGS.FRONTEND_URL + path + encoded.hexdigest()
 
     def verify_password(
         self, plain_password: str, hashed_password: str
