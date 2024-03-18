@@ -111,3 +111,33 @@ async def update_logged_user(
 )
 async def delete_user(id: int, db: Session = Depends(get_db)) -> None:
     return UserManager(db).delete_user(id)
+
+
+@router.get("/me/request-password-change", status_code=status.HTTP_200_OK)
+async def request_password_change(
+    db: Session = Depends(get_db),
+    fast_mail: FastMail = Depends(get_fast_mail),
+    user: User = Security(get_current_user, scopes=["users:self"]),
+) -> dict:
+    password_change_request = UserManager(db).create_password_change_request(
+        user
+    )
+    body_variables = {
+        **user.model_dump(),
+        "link": password_change_request.link,
+        # Adjust timezone as needed!
+        "expiration": password_change_request.expiration.strftime(
+            "%d/%m/%Y %H:%M:%S%z"
+        ),
+    }
+    message = MessageSchema(
+        subject="Password Change Request",
+        recipients=[user.model_dump().get("email")],
+        template_body=body_variables,
+        subtype=MessageType.html,
+    )
+
+    await fast_mail.send_message(
+        message, template_name="password_change_request_template.html"
+    )
+    return {"detail": "Success! Link to change password sent to e-mail."}
