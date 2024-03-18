@@ -8,6 +8,7 @@ from sqlalchemy import (
     Integer,
     String,
     Table,
+    UniqueConstraint,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from src.core.database import Base
@@ -54,6 +55,9 @@ class User(Base):
         secondary=users_roles,
         back_populates="users",
     )
+    password_change_request: Mapped["PasswordChangeRequest"] = relationship(
+        back_populates="user"
+    )
 
 
 class UserInvited(Base):
@@ -85,3 +89,18 @@ class Role(Base):
         secondary=users_invited_roles,
         back_populates="roles",
     )
+
+
+class PasswordChangeRequest(Base):
+    __tablename__ = "password_change_requests"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    link = Column(String, nullable=False)
+    expiration = Column(DateTime, nullable=False)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE")
+    )
+    user: Mapped["User"] = relationship(
+        back_populates="password_change_request", single_parent=True
+    )
+    __table_args__ = (UniqueConstraint("user_id"),)
