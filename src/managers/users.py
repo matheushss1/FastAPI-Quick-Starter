@@ -13,9 +13,13 @@ from src.managers.utils import (
     get_db_single_object_by_email,
     get_db_single_object_by_id,
 )
+from src.models.orm.user import PasswordChangeRequest as PasswordRequestORM
 from src.models.orm.user import Role as RoleORM
 from src.models.orm.user import User as UserOrm
 from src.models.orm.user import UserInvited as UserInvitedORM
+from src.models.pydantic.password_request import (
+    PasswordChangeRequest as PasswordRequestPydantic,
+)
 from src.models.pydantic.role import Role as RolePydantic
 from src.models.pydantic.user import User as UserPydantic
 from src.models.pydantic.user import (
