@@ -71,6 +71,10 @@ def test_request_password_change(
             headers={"Authorization": f"Bearer {user_member_token}"},
         )
         assert response.status_code == 200
+        assert (
+            response.json().get("detail")
+            == "Success! Link to change password sent to e-mail."
+        )
         assert len(outbox) == 1
         assert (
             outbox[0]["from"]
