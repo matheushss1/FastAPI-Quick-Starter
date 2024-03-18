@@ -81,3 +81,18 @@ def test_request_password_change(
             == f"{settings.MAIL_FROM_NAME} <{settings.MAIL_FROM}>"
         )
         assert outbox[0]["To"] == user_member.email
+
+
+def test_resent_password_change_request_raises_error(
+    client: TestClient,
+    user_member_token: str,
+):
+    response = client.get(
+        "/user/me/request-password-change",
+        headers={"Authorization": f"Bearer {user_member_token}"},
+    )
+    assert response.status_code == 400
+    assert (
+        response.json().get("detail")
+        == "Password change already requested. Please check your e-mail."
+    )
