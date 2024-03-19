@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, List
 
 from fastapi import APIRouter, Depends, Security, status
 from fastapi.security import OAuth2PasswordRequestForm
@@ -163,3 +163,33 @@ async def change_password(
     payload: PasswordChangePayload, db: Session = Depends(get_db)
 ) -> User:
     return UserManager(db).change_password(payload)
+
+
+@router.get(
+    "/",
+    status_code=status.HTTP_200_OK,
+    response_model=List[User],
+    dependencies=[Security(get_current_user, scopes=["users:r"])],
+)
+async def list_users(db: Session = Depends(get_db)) -> List[User]:
+    return UserManager(db).list_users()
+
+
+@router.get(
+    "/{id}",
+    status_code=status.HTTP_200_OK,
+    response_model=User,
+    dependencies=[Security(get_current_user, scopes=["users:r"])],
+)
+async def get_user_by_id(id: int, db: Session = Depends(get_db)) -> User:
+    return UserManager(db).get_user_by_id(id)
+
+
+@router.get(
+    "/email/{email}",
+    status_code=status.HTTP_200_OK,
+    response_model=User,
+    dependencies=[Security(get_current_user, scopes=["users:r"])],
+)
+async def get_user_by_email(email: str, db: Session = Depends(get_db)) -> User:
+    return UserManager(db).get_user_by_email(email)
