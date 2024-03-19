@@ -61,14 +61,14 @@ def test_request_password_change(
     client: TestClient,
     settings: Settings,
     user_member: User,
-    user_member_token: str,
 ):
     fast_mail = get_fast_mail()
     fast_mail.config.SUPPRESS_SEND = 1
     with fast_mail.record_messages() as outbox:
-        response = client.get(
-            "/user/me/request-password-change",
-            headers={"Authorization": f"Bearer {user_member_token}"},
+        email = str(user_member.email)
+        email_encoded = b64encode(email.encode()).decode()
+        response = client.put(
+            "/user/me/forgot-password", json={"email": email_encoded}
         )
         assert response.status_code == 200
         assert (
@@ -85,11 +85,12 @@ def test_request_password_change(
 
 def test_resent_password_change_request_raises_error(
     client: TestClient,
-    user_member_token: str,
+    user_member: User,
 ):
-    response = client.get(
-        "/user/me/request-password-change",
-        headers={"Authorization": f"Bearer {user_member_token}"},
+    email = str(user_member.email)
+    email_encoded = b64encode(email.encode()).decode()
+    response = client.put(
+        "/user/me/forgot-password", json={"email": email_encoded}
     )
     assert response.status_code == 400
     assert (
