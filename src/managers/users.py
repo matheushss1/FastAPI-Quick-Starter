@@ -249,9 +249,9 @@ class UserManager:
     def create_user_link(
         self, email: str, is_password_change_request: bool = False
     ) -> str:
-        encoded = md5(email.encode())
+        encoded = b64encode(email.encode()).decode()
         path = "invitations/" if not is_password_change_request else "request/"
-        return SETTINGS.FRONTEND_URL + path + encoded.hexdigest()
+        return SETTINGS.FRONTEND_URL + path + encoded
 
     def verify_password(
         self, plain_password: str, hashed_password: str
