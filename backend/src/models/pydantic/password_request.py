@@ -11,3 +11,7 @@ class PasswordChangeRequest(BaseModel):
 
 class EmailEncoded(BaseModel):
     email: str
+
+
+class PasswordChangePayload(EmailEncoded):
+    new_password: str
