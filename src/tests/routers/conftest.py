@@ -84,6 +84,29 @@ def role_user_member_fixture(session: Session) -> Role:
     return role
 
 
+@fixture(name="role_user_manager")
+def role_user_manager_fixture(session: Session) -> Role:
+    manager_mode = "rw"
+    role_in_db = (
+        session.query(Role)
+        .where(and_(Role.module == "users", Role.mode == manager_mode))
+        .all()
+    )
+    if len(role_in_db):
+        return role_in_db[0]
+    role = Role(
+        name=generate_role_name(mode=manager_mode),
+        description=generate_role_description(
+            module="users", mode=manager_mode
+        ),
+        module="users",
+        mode=manager_mode,
+    )
+    session.add(role)
+    session.commit()
+    return role
+
+
 @fixture(name="user_invited")
 def user_invited_fixture(
     session: Session, role_user_member: Role
