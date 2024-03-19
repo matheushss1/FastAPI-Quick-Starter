@@ -14,10 +14,13 @@ from src.managers.utils import (
     get_db_single_object_by_email,
     get_db_single_object_by_id,
 )
-from src.models.orm.user import PasswordChangeRequest as PasswordRequestORM
+from src.models.orm.user import (
+    PasswordChangeRequest as PasswordChangeRequestORM,
+)
 from src.models.orm.user import Role as RoleORM
 from src.models.orm.user import User as UserOrm
 from src.models.orm.user import UserInvited as UserInvitedORM
+from src.models.pydantic.password_request import PasswordChangePayload
 from src.models.pydantic.password_request import (
     PasswordChangeRequest as PasswordRequestPydantic,
 )
@@ -221,7 +224,7 @@ class UserManager:
             email=user_db.email, is_password_change_request=True
         )
         expiration = datetime.now() + timedelta(hours=1)
-        password_change_request = PasswordRequestORM(
+        password_change_request = PasswordChangeRequestORM(
             link=link, expiration=expiration, user_id=user_db.id
         )
         self.db.add(password_change_request)
@@ -254,7 +257,7 @@ class UserManager:
         return result
 
     def deleted_expired_password_request(
-        self, password_change_request: PasswordRequestORM
+        self, password_change_request: PasswordChangeRequestORM
     ) -> bool:
         if password_change_request.expiration < datetime.now():
             statement = delete(PasswordRequestORM).where(
