@@ -1,7 +1,7 @@
 from base64 import b64decode, b64encode
 from binascii import Error as binascii_error
 from datetime import datetime, timedelta, timezone
-from typing import Literal, Union
+from typing import List, Literal, Union
 
 from bcrypt import checkpw, gensalt, hashpw
 from fastapi import HTTPException
@@ -128,6 +128,28 @@ class UserManager:
         self.db.commit()
         return self.get_db_user_by_email(user_creation.email)
 
+    def list_users(self) -> List[UserPydantic]:
+        users = self.db.query(UserOrm).all()
+        return [self.parse_orm_user_to_pydantic(user) for user in users]
+
+    def get_user_by_id(self, id: int) -> UserPydantic:
+        user = get_db_single_object_by_id(
+            db=self.db,
+            model=UserOrm,
+            id=id,
+            exception=HTTPException(404, "User not found."),
+        )
+        return self.parse_orm_user_to_pydantic(user)
+
+    def get_user_by_email(self, email: str) -> UserPydantic:
+        user = get_db_single_object_by_email(
+            db=self.db,
+            model=UserOrm,
+            email=email,
+            exception=HTTPException(404, "User not found."),
+        )
+        return self.parse_orm_user_to_pydantic(user)
+
     def get_db_user_by_email(self, email: str) -> UserPydantic:
         """
         Query the DB for the user with the given e-mail.
@@ -138,19 +160,21 @@ class UserManager:
             email=email,
             exception=HTTPException(404, "User not found"),
         )
-        user_roles = [
-            RolePydantic(
-                name=role.name,
-                description=role.description,
-                module=role.module,
-                mode=role.mode,
-            )
-            for role in user.roles
-        ]
+        return self.parse_orm_user_to_pydantic(user)
+
+    def parse_orm_user_to_pydantic(self, user: UserOrm) -> UserPydantic:
         return UserPydantic(
             name=user.name,
             email=user.email,
-            roles=user_roles,
+            roles=[
+                RolePydantic(
+                    name=role.name,
+                    description=role.description,
+                    module=role.module,
+                    mode=role.mode,
+                )
+                for role in user.roles
+            ],
         )
 
     def update_user(
@@ -233,19 +257,7 @@ class UserManager:
             "password_change_request": PasswordRequestPydantic(
                 link=link, expiration=expiration, user_id=user_db.id
             ),
-            "user": UserPydantic(
-                name=user_db.name,
-                email=user_db.email,
-                roles=[
-                    RolePydantic(
-                        name=role.name,
-                        description=role.description,
-                        module=role.module,
-                        mode=role.mode,
-                    )
-                    for role in user_db.roles
-                ],
-            ),
+            "user": self.parse_orm_user_to_pydantic(user_db),
         }
 
     def change_password(
@@ -287,20 +299,7 @@ class UserManager:
             id=user.id,
             exception=HTTPException(500, "Something is really really wrong."),
         )
-
-        return UserPydantic(
-            name=updated_user.name,
-            email=updated_user.email,
-            roles=[
-                RolePydantic(
-                    name=role.name,
-                    description=role.description,
-                    module=role.module,
-                    mode=role.mode,
-                )
-                for role in updated_user.roles
-            ],
-        )
+        return self.parse_orm_user_to_pydantic(updated_user)
 
     def get_password_change_request(
         self, password_change_request_id: int
@@ -400,20 +399,7 @@ class UserManager:
             ),
         )
         _ = self.verify_password(password, user.hashed_password)
-        user_roles = [
-            RolePydantic(
-                name=role.name,
-                description=role.description,
-                module=role.module,
-                mode=role.mode,
-            )
-            for role in user.roles
-        ]
-        return UserPydantic(
-            name=user.name,
-            email=user.email,
-            roles=user_roles,
-        )
+        return self.parse_orm_user_to_pydantic(user)
 
     def create_access_token(
         self, data: dict, expires_delta: timedelta | None = None
