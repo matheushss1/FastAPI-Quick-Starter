@@ -13,6 +13,7 @@ from src.models.pydantic.password_request import (
     EmailEncoded,
     PasswordChangePayload,
 )
+from src.models.pydantic.role import UserRolesPayload
 from src.models.pydantic.user import (
     Token,
     User,
@@ -193,3 +194,15 @@ async def get_user_by_id(id: int, db: Session = Depends(get_db)) -> User:
 )
 async def get_user_by_email(email: str, db: Session = Depends(get_db)) -> User:
     return UserManager(db).get_user_by_email(email)
+
+
+@router.put(
+    "/role/assign",
+    status_code=status.HTTP_200_OK,
+    response_model=User,
+    dependencies=[Security(get_current_user, scopes=["users:all"])],
+)
+async def assign_roles_to_user(
+    payload: UserRolesPayload, db: Session = Depends(get_db)
+) -> User:
+    return UserManager(db).assign_roles_to_user(payload)
