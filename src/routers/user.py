@@ -9,7 +9,10 @@ from src.core.email import get_fast_mail
 from src.core.security import get_current_user
 from src.core.utils import get_user_scopes
 from src.managers.users import UserManager
-from src.models.pydantic.password_request import EmailEncoded
+from src.models.pydantic.password_request import (
+    EmailEncoded,
+    PasswordChangePayload,
+)
 from src.models.pydantic.user import (
     Token,
     User,
@@ -151,3 +154,12 @@ async def request_password_change(
         message, template_name="password_change_request_template.html"
     )
     return {"detail": "Success! Link to change password sent to e-mail."}
+
+
+@router.put(
+    "/me/change-password", status_code=status.HTTP_200_OK, response_model=User
+)
+async def change_password(
+    payload: PasswordChangePayload, db: Session = Depends(get_db)
+) -> User:
+    return UserManager(db).change_password(payload)
