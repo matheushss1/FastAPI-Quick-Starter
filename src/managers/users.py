@@ -196,12 +196,13 @@ class UserManager:
         )
 
     def create_password_change_request(
-        self, user: UserPydantic
-    ) -> PasswordRequestPydantic:
+        self, email_encoded: str
+    ) -> dict[str, Union[PasswordRequestPydantic, UserPydantic]]:
+        email = self.decode_base64_str(email_encoded)
         user_db = get_db_single_object_by_email(
             db=self.db,
             model=UserOrm,
-            email=user.email,
+            email=email,
             exception=HTTPException(500, "Something is really wrong."),
         )
         if user_db.password_change_request:
@@ -217,7 +218,7 @@ class UserManager:
                     ),
                 )
         link = self.create_user_link(
-            email=user.email, is_password_change_request=True
+            email=user_db.email, is_password_change_request=True
         )
         expiration = datetime.now() + timedelta(hours=1)
         password_change_request = PasswordRequestORM(
@@ -225,6 +226,24 @@ class UserManager:
         )
         self.db.add(password_change_request)
         self.db.commit()
+        return {
+            "password_change_request": PasswordRequestPydantic(
+                link=link, expiration=expiration, user_id=user_db.id
+            ),
+            "user": UserPydantic(
+                name=user_db.name,
+                email=user_db.email,
+                roles=[
+                    RolePydantic(
+                        name=role.name,
+                        description=role.description,
+                        module=role.module,
+                        mode=role.mode,
+                    )
+                    for role in user_db.roles
+                ],
+            ),
+        }
 
     def decode_base64_str(self, to_be_decoded: str) -> str:
         result = None
