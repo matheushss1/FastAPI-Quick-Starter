@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from src.config.settings import Settings
 from src.core.email import get_fast_mail
 from src.models.orm.user import Role, User
+from src.models.pydantic.user import User as UserPydantic
 
 
 def test_update_user_name(
@@ -169,3 +170,86 @@ def test_create_new_password_without_requesting_change_raises_error(
         response.json().get("detail")
         == "You should request this change first."
     )
+
+
+def test_get_user_by_id(
+    client: TestClient,
+    user_member: User,
+    role_user_member: Role,
+    superuser_token: str,
+):
+    response = client.get(
+        f"/user/{user_member.id}",
+        headers={"Authorization": f"Bearer {superuser_token}"},
+    )
+    assert response.status_code == 200
+    assert response.json() == {
+        "name": user_member.name,
+        "email": user_member.email,
+        "roles": [
+            {
+                "name": role_user_member.name,
+                "description": role_user_member.description,
+                "module": role_user_member.module,
+                "mode": role_user_member.mode,
+            }
+        ],
+    }
+
+
+def test_get_user_by_id_with_wrong_id_raises_error(
+    client: TestClient,
+    superuser_token: str,
+):
+    response = client.get(
+        "/user/1000",
+        headers={"Authorization": f"Bearer {superuser_token}"},
+    )
+    assert response.status_code == 404
+    assert response.json().get("detail") == "User not found."
+
+
+def test_get_user_by_email(
+    client: TestClient,
+    user_member: User,
+    role_user_member: Role,
+    superuser_token: str,
+):
+    response = client.get(
+        f"/user/email/{user_member.email}",
+        headers={"Authorization": f"Bearer {superuser_token}"},
+    )
+    assert response.status_code == 200
+    assert response.json() == {
+        "name": user_member.name,
+        "email": user_member.email,
+        "roles": [
+            {
+                "name": role_user_member.name,
+                "description": role_user_member.description,
+                "module": role_user_member.module,
+                "mode": role_user_member.mode,
+            }
+        ],
+    }
+
+
+def test_get_user_by_email_with_wrong_id_raises_error(
+    client: TestClient,
+    superuser_token: str,
+):
+    response = client.get(
+        "/user/email/wrong-email@pytest.com",
+        headers={"Authorization": f"Bearer {superuser_token}"},
+    )
+    assert response.status_code == 404
+    assert response.json().get("detail") == "User not found."
+
+
+def test_list_users(client: TestClient, superuser_token: str):
+    response = client.get(
+        "/user/",
+        headers={"Authorization": f"Bearer {superuser_token}"},
+    )
+    assert response.status_code == 200
+    assert [UserPydantic(**user) for user in response.json()]
