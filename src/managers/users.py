@@ -327,7 +327,7 @@ class UserManager:
         result = None
         try:
             result = b64decode(to_be_decoded.encode()).decode()
-        except binascii_error as _:
+        except binascii_error as _:  # noqa
             raise HTTPException(500, "Something is really wrong!")
         return result
 
