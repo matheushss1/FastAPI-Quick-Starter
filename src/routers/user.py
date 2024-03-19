@@ -9,6 +9,7 @@ from src.core.email import get_fast_mail
 from src.core.security import get_current_user
 from src.core.utils import get_user_scopes
 from src.managers.users import UserManager
+from src.models.pydantic.password_request import EmailEncoded
 from src.models.pydantic.user import (
     Token,
     User,
@@ -113,26 +114,35 @@ async def delete_user(id: int, db: Session = Depends(get_db)) -> None:
     return UserManager(db).delete_user(id)
 
 
-@router.get("/me/request-password-change", status_code=status.HTTP_200_OK)
+@router.put(
+    "/me/forgot-password",
+    status_code=status.HTTP_200_OK,
+)
 async def request_password_change(
+    email_encoded: EmailEncoded,
     db: Session = Depends(get_db),
     fast_mail: FastMail = Depends(get_fast_mail),
-    user: User = Security(get_current_user, scopes=["users:self"]),
 ) -> dict:
-    password_change_request = UserManager(db).create_password_change_request(
-        user
-    )
+    password_change_request_and_user = UserManager(
+        db
+    ).create_password_change_request(email_encoded.email)
     body_variables = {
-        **user.model_dump(),
-        "link": password_change_request.link,
+        **password_change_request_and_user.get("user").model_dump(),
+        "link": password_change_request_and_user.get(
+            "password_change_request"
+        ).link,
         # Adjust timezone as needed!
-        "expiration": password_change_request.expiration.strftime(
-            "%d/%m/%Y %H:%M:%S%z"
-        ),
+        "expiration": password_change_request_and_user.get(
+            "password_change_request"
+        ).expiration.strftime("%d/%m/%Y %H:%M:%S%z"),
     }
     message = MessageSchema(
         subject="Password Change Request",
-        recipients=[user.model_dump().get("email")],
+        recipients=[
+            password_change_request_and_user.get("user")
+            .model_dump()
+            .get("email")
+        ],
         template_body=body_variables,
         subtype=MessageType.html,
     )
