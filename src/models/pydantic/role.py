@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 
 from pydantic import BaseModel
 
@@ -15,3 +15,8 @@ class RoleUpdating(BaseModel):
     description: Optional[str]
     module: Optional[str]
     mode: Optional[str]
+
+
+class UserRolesPayload(BaseModel):
+    email: str
+    roles_ids: List[int]
