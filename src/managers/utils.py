@@ -62,7 +62,7 @@ def get_db_list_of_objects_by_list_of_ids(
 def get_db_single_object_by_id(
     db: Session,
     model: Any,
-    id: str,
+    id: int,
     exception: HTTPException,
     expect_none=False,
 ) -> Union[Any, None]:
