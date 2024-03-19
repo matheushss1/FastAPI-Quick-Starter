@@ -248,6 +248,81 @@ class UserManager:
             ),
         }
 
+    def change_password(
+        self,
+        payload: PasswordChangePayload,
+    ) -> UserPydantic:
+        user = get_db_single_object_by_email(
+            db=self.db,
+            model=UserOrm,
+            email=payload.email,
+            exception=HTTPException(400, "Check the credentials."),
+        )
+
+        if not getattr(user, "password_change_request"):
+            raise HTTPException(400, "You should request this change first.")
+
+        password_change_request = self.get_password_change_request(
+            password_change_request_id=user.password_change_request.id
+        )
+
+        if self.deleted_expired_password_request(password_change_request):
+            raise HTTPException(
+                400,
+                (
+                    "Password change request expired,"
+                    " please request the change again."
+                ),
+            )
+
+        self.delete_password_change_request(password_change_request)
+
+        self.update_password_in_db(
+            new_password=payload.new_password, user_id=user.id
+        )
+
+        updated_user = get_db_single_object_by_id(
+            db=self.db,
+            model=UserOrm,
+            id=user.id,
+            exception=HTTPException(500, "Something is really really wrong."),
+        )
+
+        return UserPydantic(
+            name=updated_user.name,
+            email=updated_user.email,
+            roles=[
+                RolePydantic(
+                    name=role.name,
+                    description=role.description,
+                    module=role.module,
+                    mode=role.mode,
+                )
+                for role in updated_user.roles
+            ],
+        )
+
+    def get_password_change_request(
+        self, password_change_request_id: int
+    ) -> PasswordChangeRequestORM:
+        password_change_requests = (
+            self.db.query(PasswordChangeRequestORM)
+            .where(PasswordChangeRequestORM.id == password_change_request_id)
+            .all()
+        )
+        return password_change_requests[0]
+
+    def update_password_in_db(self, new_password: str, user_id: int) -> None:
+        new_password_hash = self.get_password_hash(new_password)
+        change_password_statement = (
+            update(UserOrm)
+            .where(UserOrm.id == user_id)
+            .values(hashed_password=new_password_hash)
+        )
+        self.db.execute(change_password_statement)
+        self.db.commit()
+        return
+
     def decode_base64_str(self, to_be_decoded: str) -> str:
         result = None
         try:
@@ -256,15 +331,21 @@ class UserManager:
             raise HTTPException(500, "Something is really wrong!")
         return result
 
+    def delete_password_change_request(
+        self, password_change_request: PasswordChangeRequestORM
+    ) -> None:
+        statement = delete(PasswordChangeRequestORM).where(
+            PasswordChangeRequestORM.id == password_change_request.id
+        )
+        self.db.execute(statement)
+        self.db.commit()
+        return
+
     def deleted_expired_password_request(
         self, password_change_request: PasswordChangeRequestORM
     ) -> bool:
         if password_change_request.expiration < datetime.now():
-            statement = delete(PasswordRequestORM).where(
-                PasswordRequestORM.id == password_change_request.id
-            )
-            self.db.execute(statement)
-            self.db.commit()
+            self.delete_password_change_request(password_change_request)
             return True
         return False
 
