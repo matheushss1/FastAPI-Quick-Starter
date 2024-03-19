@@ -122,3 +122,50 @@ def test_request_password_change_with_non_base64_raises_error(
     )
     assert response.status_code == 500
     assert response.json().get("detail") == "Something is really wrong!"
+
+
+def test_create_new_password(
+    client: TestClient, user_member: User, role_user_member: Role
+):
+    payload = {"email": user_member.email, "new_password": "new_password"}
+    response = client.put("/user/me/change-password", json=payload)
+    user_with_role = {
+        "name": user_member.name,
+        "email": user_member.email,
+        "roles": [
+            {
+                "name": role_user_member.name,
+                "description": role_user_member.description,
+                "module": role_user_member.module,
+                "mode": role_user_member.mode,
+            }
+        ],
+    }
+    assert response.status_code == 200
+    assert response.json() == user_with_role
+
+
+def test_create_new_password_with_wrong_email_raises_error(client: TestClient):
+    payload = {
+        "email": "wrong_email@pytest.com",
+        "new_password": "new_password",
+    }
+    response = client.put("/user/me/change-password", json=payload)
+    assert response.status_code == 400
+    assert response.json().get("detail") == "Check the credentials."
+
+
+def test_create_new_password_without_requesting_change_raises_error(
+    client: TestClient,
+    user_member: User,
+):
+    payload = {
+        "email": user_member.email,
+        "new_password": "not_requested_new_password",
+    }
+    response = client.put("/user/me/change-password", json=payload)
+    assert response.status_code == 400
+    assert (
+        response.json().get("detail")
+        == "You should request this change first."
+    )
