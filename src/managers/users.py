@@ -25,6 +25,7 @@ from src.models.pydantic.password_request import (
     PasswordChangeRequest as PasswordRequestPydantic,
 )
 from src.models.pydantic.role import Role as RolePydantic
+from src.models.pydantic.role import UserRolesPayload
 from src.models.pydantic.user import User as UserPydantic
 from src.models.pydantic.user import (
     UserCreation,
@@ -206,6 +207,21 @@ class UserManager:
         self.db.execute(statement)
         self.db.commit()
         return
+
+    def assign_roles_to_user(self, payload: UserRolesPayload) -> UserPydantic:
+        user = get_db_single_object_by_email(
+            db=self.db,
+            model=UserOrm,
+            email=payload.email,
+            exception=HTTPException(404, "Couldn't find user."),
+        )
+        roles = get_db_list_of_objects_by_list_of_ids(
+            db=self.db, model=RoleORM, list_of_ids=payload.roles_ids
+        )
+        for role in roles:
+            user.roles.append(role)
+        self.db.commit()
+        return self.parse_orm_user_to_pydantic(user)
 
     def get_db_user_invited_by_email(self, email: str) -> UserInvited:
         user_invited = get_db_single_object_by_email(
