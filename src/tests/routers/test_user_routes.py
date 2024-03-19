@@ -1,3 +1,5 @@
+from base64 import b64encode
+
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 from src.config.settings import Settings
@@ -97,3 +99,26 @@ def test_resent_password_change_request_raises_error(
         response.json().get("detail")
         == "Password change already requested. Please check your e-mail."
     )
+
+
+def test_request_password_change_with_wrong_email_raises_error(
+    client: TestClient,
+):
+    wrong_email = "wrong_email@pytest.com"
+    email_encoded = b64encode(wrong_email.encode()).decode()
+    response = client.put(
+        "/user/me/forgot-password", json={"email": email_encoded}
+    )
+    assert response.status_code == 500
+    assert response.json().get("detail") == "Something is really wrong."
+
+
+def test_request_password_change_with_non_base64_raises_error(
+    client: TestClient,
+):
+    wrong_email = "this is not base64"
+    response = client.put(
+        "/user/me/forgot-password", json={"email": wrong_email}
+    )
+    assert response.status_code == 500
+    assert response.json().get("detail") == "Something is really wrong!"
