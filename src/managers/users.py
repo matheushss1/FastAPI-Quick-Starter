@@ -1,6 +1,7 @@
+from base64 import b64decode, b64encode
+from binascii import Error as binascii_error
 from datetime import datetime, timedelta, timezone
-from hashlib import md5
-from typing import Literal
+from typing import Literal, Union
 
 from bcrypt import checkpw, gensalt, hashpw
 from fastapi import HTTPException
@@ -224,9 +225,14 @@ class UserManager:
         )
         self.db.add(password_change_request)
         self.db.commit()
-        return PasswordRequestPydantic(
-            link=link, expiration=expiration, user_id=user_db.id
-        )
+
+    def decode_base64_str(self, to_be_decoded: str) -> str:
+        result = None
+        try:
+            result = b64decode(to_be_decoded.encode()).decode()
+        except binascii_error as _:
+            raise HTTPException(500, "Something is really wrong!")
+        return result
 
     def deleted_expired_password_request(
         self, password_change_request: PasswordRequestORM
