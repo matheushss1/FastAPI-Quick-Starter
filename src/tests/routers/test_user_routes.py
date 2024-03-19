@@ -253,3 +253,43 @@ def test_list_users(client: TestClient, superuser_token: str):
     )
     assert response.status_code == 200
     assert [UserPydantic(**user) for user in response.json()]
+
+
+def test_assign_roles_to_user(
+    client: TestClient,
+    session: Session,
+    role_user_member: Role,
+    role_user_manager: Role,
+    superuser_token: str,
+):
+    response = client.put(
+        "/user/role/assign",
+        json={
+            "email": "user-invited@email.com",
+            "roles_ids": [role_user_manager.id],
+        },
+        headers={"Authorization": f"Bearer {superuser_token}"},
+    )
+    assert response.status_code == 200
+    assert response.json() == {
+        "name": "test",
+        "email": "user-invited@email.com",
+        "roles": [
+            {
+                "name": role_user_member.name,
+                "description": role_user_member.description,
+                "module": role_user_member.module,
+                "mode": role_user_member.mode,
+            },
+            {
+                "name": role_user_manager.name,
+                "description": role_user_manager.description,
+                "module": role_user_manager.module,
+                "mode": role_user_manager.mode,
+            },
+        ],
+    }
+    user_in_db = (
+        session.query(User).where(User.email == "user-invited@email.com").one()
+    )
+    assert role_user_manager in user_in_db.roles
